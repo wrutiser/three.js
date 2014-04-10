@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- derived from github.com/mrdoob/three.js/wiki/Getting-Started  -->
+    <!-- Derived from https://github.com/mrdoob/three.js/wiki/Getting-Started -->
 
     <title>Getting Started with Three.js</title>    
 
@@ -10,10 +10,21 @@
     <script src="../build/three.min.js"></script>
     
     <script>
+    var dtr = function( x ){ return Math.PI * (x / 180 ) }
+
+    var mkGrid = function( size, step, color1, color2, axis ) {
+        var gh = new THREE.GridHelper( size, step );
+        gh.setColors( color1, color2 );
+        gh.rotation[ axis ] = dtr( 90 );
+        return gh ;
+    }
+
     window.onload = function() {
 
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize( 800, 600 );
+        renderer.setClearColor( 0x444444, 0 )
+
         document.body.appendChild( renderer.domElement );
 
         var scene = new THREE.Scene();
@@ -24,22 +35,27 @@
             0.1,            // Near plane
             10000           // Far plane
         );
-        camera.position.set( -15, 10, 10 );
+        camera.position.set( -30, 20, 20 );
         camera.lookAt( scene.position );
 
-        var geometry = new THREE.CubeGeometry( 5, 5, 5 );
+        var geometry = new THREE.CubeGeometry( 4, 4, 4 );
         var material = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
         var mesh = new THREE.Mesh( geometry, material );
         scene.add( mesh );
 
-        var axisHelper = new THREE.AxisHelper( 100 );
+        var axisHelper = new THREE.AxisHelper( 15 );
         scene.add( axisHelper );
 
-        var light = new THREE.PointLight( 0xFFFF00 );
-        //light.position.set( 10, 0, 10 );
-        light.position.set( -15, 10, 10 );
-        light.position.set( -20, 30, 30);
-        scene.add( light );
+        scene.add( mkGrid( 10, 1, 0xffffff, 0x00ff00, '?' ) ); // FIXME
+        scene.add( mkGrid( 10, 1, 0xffffff, 0x0000ff, 'x' ) );
+        scene.add( mkGrid( 10, 1, 0xffffff, 0xff0000, 'z' ) );
+
+        var ambLight = new THREE.AmbientLight( 0x404040 ); // soft white
+        scene.add( ambLight );
+
+        var ptLight = new THREE.PointLight( 0xFFFF00 );
+        ptLight.position.set( -20, 40, 30);
+        scene.add( ptLight );
 
         renderer.render( scene, camera );
 
@@ -48,3 +64,5 @@
 </head>
 <body></body>
 </html>
+
+
