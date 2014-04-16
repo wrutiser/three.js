@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>DAT.GUI Toy 2</title>    
+
+    <script src="libs/dat.gui.min.js"></script>
+
+    <script >
+    window.onload = function() {
+
+      var fooGui = new dat.GUI();
+
+      var fooVars = {
+          fooNumber: 100,
+          fooString: "xyzzy",
+          fooBoolean: false
+      }
+
+      console.log( "Hello" );
+
+      fooNumberController = fooGui.add(fooVars, "fooNumber");
+      fooStringController = fooGui.add(fooVars, "fooString");
+      fooBooleanController = fooGui.add(fooVars, "fooBoolean");
+
+      fooStringController.onChange( function( newValue ) {
+          console.log( "fooString changed to " + newValue );
+        }
+      );
+
+      fooNumberController.onChange( function( newValue ) {
+          console.log( "fooNumber changed to " + newValue );
+        }
+      );
+
+      fooBooleanController.onChange( function( newValue ) {
+          console.log( "fooBoolean changed to " + newValue );
+        }
+      );
+  }
+    </script>
+</head>
+<body></body>
+  <h1>  No Body Here Either </h1>
+</html>
+
+
+
