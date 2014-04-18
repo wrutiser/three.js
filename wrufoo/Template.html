@@ -4,19 +4,27 @@
     <title>Template (Three.js)</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!--
     <link rel=stylesheet href="css/base.css"/>
+-->
 </head>
 <body>
 
-<script src="js/Three.js"></script>
+<script src="../build/Three.js"></script>
+<!--
 <script src="js/Detector.js"></script>
 <script src="js/Stats.js"></script>
 <script src="js/OrbitControls.js"></script>
 <script src="js/THREEx.KeyboardState.js"></script>
 <script src="js/THREEx.FullScreen.js"></script>
 <script src="js/THREEx.WindowResize.js"></script>
+-->
+
+<script src="../examples/js/controls/OrbitControls.js"></script>
+
 
 <!-- Code to display an information button and box when clicked. -->
+<!--
 <script src="js/jquery-1.9.1.js"></script>
 <script src="js/jquery-ui.js"></script>
 <link rel=stylesheet href="css/jquery-ui.css" />
@@ -27,9 +35,19 @@
 This three.js demo is part of a collection at
 <a href="http://stemkoski.github.io/Three.js/">http://stemkoski.github.io/Three.js/</a>
 </div>
+-->
 <!-- ------------------------------------------------------------ -->
 
-<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>
+<!--
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>  
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px;"></div>
+<div id="ThreeJS'> </div>
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:100px"></div>  
+-->
+
+<img src="checkerboard.jpg">
+<div id="ThreeJS" style="z-index: 1; position: relative; left:0px; top:0px"></div>  
+
 <script>
 /*
 	Three.js "tutorials by example"
@@ -41,7 +59,7 @@ This three.js demo is part of a collection at
 
 // standard global variables
 var container, scene, camera, renderer, controls, stats;
-var keyboard = new THREEx.KeyboardState();
+///// var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 
 // custom global variables
@@ -63,38 +81,48 @@ function init()
 	camera.position.set(0,150,400);
 	camera.lookAt(scene.position);	
 	// RENDERER
+  /*******
 	if ( Detector.webgl )
 		renderer = new THREE.WebGLRenderer( {antialias:true} );
 	else
 		renderer = new THREE.CanvasRenderer(); 
+  ******/  
+  renderer = new THREE.WebGLRenderer( {antialias:true} );
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	container = document.getElementById( 'ThreeJS' );
 	container.appendChild( renderer.domElement );
 	// EVENTS
-	THREEx.WindowResize(renderer, camera);
-	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	//////////////// THREEx.WindowResize(renderer, camera);
+	//////////////// THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
+  /****************
 	stats = new Stats();
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.bottom = '0px';
 	stats.domElement.style.zIndex = 100;
 	container.appendChild( stats.domElement );
+  *****************/
 	// LIGHT
 	var light = new THREE.PointLight(0xffffff);
 	light.position.set(100,250,100);
 	scene.add(light);
+  var amblight = new THREE.AmbientLight( 0x444444 );
+  scene.add(light);
 	// FLOOR
-	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
-	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-	floorTexture.repeat.set( 10, 10 );
-	var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
-	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-	floor.position.y = -0.5;
-	floor.rotation.x = Math.PI / 2;
-	scene.add(floor);
+    var floorTexture = new THREE.ImageUtils.loadTexture( './checkerboard.jpg' );
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+    floorTexture.repeat.set( 10, 10 );
+  //    var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+    var floorMaterial = new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffff00, side: THREE.DoubleSide } );
+    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.y = -0.5;
+    floor.rotation.x = Math.PI / 2;
+    scene.add(floor);
+
+    scene.add( new THREE.AxisHelper(100) );
 	// SKYBOX
 	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
@@ -105,8 +133,10 @@ function init()
 	// CUSTOM //
 	////////////
 	
-	var geometry = new THREE.SphereGeometry( 30, 32, 16 );
-	var material = new THREE.MeshLambertMaterial( { color: 0x000088 } );
+	//var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+	var geometry = new THREE.IcosahedronGeometry( 30, 0 );
+	//var material = new THREE.MeshLambertMaterial( { color: 0x000088 } );
+	var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
 	mesh = new THREE.Mesh( geometry, material );
 	mesh.position.set(0,40,0);
 	scene.add(mesh);
@@ -122,14 +152,15 @@ function animate()
 
 function update()
 {
-	if ( keyboard.pressed("z") ) 
+	/*****************
+  if ( keyboard.pressed("z") ) 
 	{	  
 		// do something
 	}
-	
-	controls.update();
+	************************/
+//////////////////////	controls.update();
 	camera.up = new THREE.Vector3(0,1,0);
-	stats.update();
+	//////////////////stats.update();
 }
 
 function render() 
