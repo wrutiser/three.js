@@ -21,6 +21,7 @@
 -->
 
 <script src="../examples/js/controls/OrbitControls.js"></script>
+<script src="libs/DAT.GUI.min.js"></script>
 
 
 <!-- Code to display an information button and box when clicked. -->
@@ -45,8 +46,7 @@ This three.js demo is part of a collection at
 <div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:100px"></div>  
 -->
 
-<img src="checkerboard.jpg">
-<div id="ThreeJS" style="z-index: 1; position: relative; left:0px; top:0px"></div>  
+<div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
 
 <script>
 /*
@@ -109,20 +109,13 @@ function init()
 	light.position.set(100,250,100);
 	scene.add(light);
   var amblight = new THREE.AmbientLight( 0x444444 );
-  scene.add(light);
-	// FLOOR
-    var floorTexture = new THREE.ImageUtils.loadTexture( './checkerboard.jpg' );
-    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-    floorTexture.repeat.set( 10, 10 );
-  //    var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-    var floorMaterial = new THREE.MeshBasicMaterial( { wireframe: true, color: 0xffff00, side: THREE.DoubleSide } );
-    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
-    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.position.y = -0.5;
-    floor.rotation.x = Math.PI / 2;
-    scene.add(floor);
+  scene.add(amblight);
+  
+  var color1 = new THREE.Color( 0x777777 ) ;
+  var color2 = new THREE.Color( 0xeeeeee ) ;
+  scene.add( makeFloor( color1, color2, 1, 1 ));
+  scene.add( new THREE.AxisHelper(100) );
 
-    scene.add( new THREE.AxisHelper(100) );
 	// SKYBOX
 	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
@@ -130,9 +123,90 @@ function init()
 	scene.add(skyBox);
 	
 	////////////
+	//  GUI   //
+	////////////
+
+  var gui = new dat.GUI();
+  gui_parameters =
+  {
+    floorcolor1:  "#777777",
+    floorcolor2:  "#eeeeee",
+    floorpnumber1: 1,
+    floorpnumber2: 1,
+    floorvisible: true,
+    recolorfloor: function(){ paintfloor(); },
+    model: "Flag"                  
+  }
+
+  var floorFolder = gui.addFolder( 'Floor' );
+
+  var floorColor1 = floorFolder.addColor( gui_parameters, 'floorcolor1' )
+          .name( "Color 1" );
+  var floorColor2 = floorFolder.addColor( gui_parameters, 'floorcolor2' ) 
+          .name( "Color 2" );
+  floorFolder.add( gui_parameters, 'recolorfloor' ).name( "Paint Floor" );
+
+  var floorNumber1 = floorFolder.add( gui_parameters, 'floorpnumber1' )
+          .name( "Number 1" );
+  var floorNumber2 = floorFolder.add( gui_parameters, 'floorpnumber2' )
+          .name( "Number 2" );
+  var floorVisible = floorFolder.add( gui_parameters, 'floorvisible' )
+          .name( "Visible?" );
+
+  var modelselector = gui.add( gui_parameters, 'model',
+                [ "None", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+          .onChange( function(value) { changeModel( value ) } );
+
+
+
+  function paintfloor()
+  {
+    color1x = parseInt( gui_parameters.floorcolor1.replace("#","0x") );
+    var color1 = new THREE.Color( color1x );
+    color2x = parseInt( gui_parameters.floorcolor2.replace("#","0x") );
+    var color2 = new THREE.Color( color2x );
+    var newfloor = makeFloor( color1, color2,
+          gui_parameters.floorpnumber1, gui_parameters.floorpnumber2 ) ;
+    newfloor.visible = gui_parameters.floorvisible;
+    scene.remove( scene.getObjectByName( "FlOoR", false ) );
+    scene.add( newfloor );
+  }
+
+  function changeModel( value ) 
+  {
+    scene.remove( scene.getObjectByName( "HeDrOn", false ) );
+    if( value == "None" ){
+        mesh = new THREE.Mesh( );
+        scene.add( mesh );  // FIXME-- is empty mesh reasonable?
+    } else if( value == "Flag" ){
+        mesh = makeFoo();
+        scene.add( mesh );
+    } else if( value == "Icosahedron" ){
+        var geometry = new THREE.IcosahedronGeometry( 30, 0 );
+        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+        mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set(0,40,0);
+        scene.add(mesh);
+    } else if( value == "Sphere" ){
+        var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+        mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set(0,40,0);
+        scene.add(mesh);
+    } else if( value == "Cube" ){
+      mesh = Vertex_Colors();
+      scene.add( mesh );
+    }
+    mesh.name = "HeDrOn";
+
+
+  }
+
+	////////////
 	// CUSTOM //
 	////////////
 	
+  if( false ){
 	//var geometry = new THREE.SphereGeometry( 30, 32, 16 );
 	var geometry = new THREE.IcosahedronGeometry( 30, 0 );
 	//var material = new THREE.MeshLambertMaterial( { color: 0x000088 } );
@@ -140,7 +214,11 @@ function init()
 	mesh = new THREE.Mesh( geometry, material );
 	mesh.position.set(0,40,0);
 	scene.add(mesh);
-	
+  mesh.name = "HeDrOn";
+  }
+
+  // scene.add( Vertex_Colors() );
+ //  scene.add( makeFoo() );
 }
 
 function animate() 
@@ -167,6 +245,84 @@ function render()
 {
 	renderer.render( scene, camera );
 }
+
+function makeFloor( color1, color2, num1, num2 )
+{
+    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+
+    /****************
+    for( var i = 0; i < floorGeometry.faces.length; i += 2 ){
+      face  = floorGeometry.faces[ i ];	
+      face.color.set(color1);		
+      face  = floorGeometry.faces[ i + 1 ];	
+      face.color.set( color2 );
+    }
+    *************/
+    var i = 0;
+    while( i + num1 + num2 <= floorGeometry.faces.length ){
+      for( var j = 0; j < num1; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color1);		
+        i += 1;
+      }
+      for( var j = 0; j < num2; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color2);		
+        i += 1;
+      }
+
+    }
+
+    var floorMaterial = new THREE.MeshBasicMaterial(
+      { color: 0xffffff, vertexColors: THREE.FaceColors, side: THREE.DoubleSide } );
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.y = -0.5;
+    floor.rotation.x = Math.PI / 2;
+    floor.name = "FlOoR";
+
+    return floor;
+}
+
+function Vertex_Colors() 
+{
+	// this material causes a mesh to use colors assigned to faces
+	var cubeMaterial = new THREE.MeshBasicMaterial( 
+	{ color: 0xffffff, vertexColors: THREE.FaceColors } );
+	
+	var cubeGeometry = new THREE.CubeGeometry( 80, 80, 80, 3, 3, 3 );
+	for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
+	{
+		face  = cubeGeometry.faces[ i ];	
+		face.color.setRGB( Math.random(), Math.random(), Math.random() );		
+	}
+	cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
+	cube.position.set(-100, 50, 0);
+	return cube;
+}
+
+function makeFoo()
+{
+  var geometry = new THREE.Geometry();
+
+  geometry.vertices.push( new THREE.Vector3( 0, 100, 0) );
+  geometry.vertices.push( new THREE.Vector3( 0, 0, 0) );
+  geometry.vertices.push( new THREE.Vector3( 100, 0, 0) );
+  geometry.vertices.push( new THREE.Vector3( 100, 100, 0) );
+
+  geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+  geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+  geometry.faces[0].color.setHex(0xdd0000) ;
+  geometry.faces[1].color.setHex(0x0000dd) ;
+
+  var material = new THREE.MeshBasicMaterial(
+      { vertexColors: THREE.FaceColors,
+        wireframe: false,
+        color: 0xffffff } );
+
+  var mesh = new THREE.Mesh( geometry, material ) ;
+  return mesh;
+}
+
 
 </script>
 
