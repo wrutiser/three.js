@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Template (Three.js)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!--
+    <link rel=stylesheet href="css/base.css"/>
+-->
+</head>
+<body>
+
+<script src="../build/Three.js"></script>
+<!--
+<script src="js/Detector.js"></script>
+<script src="js/Stats.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/THREEx.KeyboardState.js"></script>
+<script src="js/THREEx.FullScreen.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+-->
+
+<script src="../examples/js/controls/OrbitControls.js"></script>
+<script src="libs/DAT.GUI.min.js"></script>
+
+
+<!-- Code to display an information button and box when clicked. -->
+<!--
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui.js"></script>
+<link rel=stylesheet href="css/jquery-ui.css" />
+<link rel=stylesheet href="css/info.css"/>
+<script src="js/info.js"></script>
+<div id="infoButton"></div>
+<div id="infoBox" title="Demo Information">
+This three.js demo is part of a collection at
+<a href="http://stemkoski.github.io/Three.js/">http://stemkoski.github.io/Three.js/</a>
+</div>
+-->
+<!-- ------------------------------------------------------------ -->
+
+<!--
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>  
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px;"></div>
+<div id="ThreeJS'> </div>
+<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:100px"></div>  
+-->
+
+<div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
+
+<script>
+/*
+	Three.js "tutorials by example"
+	Author: Lee Stemkoski
+	Date: July 2013 (three.js v59dev)
+ */
+
+// MAIN
+
+// standard global variables
+var container, scene, camera, renderer, controls, stats;
+///// var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+
+// custom global variables
+var mesh;
+
+init();
+animate();
+
+// FUNCTIONS 		
+function init() 
+{
+	// SCENE
+	scene = new THREE.Scene();
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,150,400);
+	camera.lookAt(scene.position);	
+	// RENDERER
+  /*******
+	if ( Detector.webgl )
+		renderer = new THREE.WebGLRenderer( {antialias:true} );
+	else
+		renderer = new THREE.CanvasRenderer(); 
+  ******/  
+  renderer = new THREE.WebGLRenderer( {antialias:true} );
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.getElementById( 'ThreeJS' );
+	container.appendChild( renderer.domElement );
+	// EVENTS
+	//////////////// THREEx.WindowResize(renderer, camera);
+	//////////////// THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	// STATS
+  /****************
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
+  *****************/
+	// LIGHT
+	var light = new THREE.PointLight(0xffffff);
+	light.position.set(100,250,100);
+	scene.add(light);
+  var amblight = new THREE.AmbientLight( 0x444444 );
+  scene.add(amblight);
+  
+  var color1 = new THREE.Color( 0x777777 ) ;
+  var color2 = new THREE.Color( 0xeeeeee ) ;
+  scene.add( makeFloor( color1, color2, 1, 1 ));
+  scene.add( new THREE.AxisHelper(100) );
+
+	// SKYBOX
+	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+	scene.add(skyBox);
+	
+	////////////
+	//  GUI   //
+	////////////
+
+  var gui = new dat.GUI();
+  gui_parameters =
+  {
+    floorcolor1:  "#777777",
+    floorcolor2:  "#eeeeee",
+    floorpnumber1: 1,
+    floorpnumber2: 1,
+    floorvisible: true,
+    recolorfloor: function(){ paintfloor(); },
+    model: "Flag"                  
+  }
+
+  var floorFolder = gui.addFolder( 'Floor' );
+
+  var floorColor1 = floorFolder.addColor( gui_parameters, 'floorcolor1' )
+          .name( "Color 1" );
+  var floorColor2 = floorFolder.addColor( gui_parameters, 'floorcolor2' ) 
+          .name( "Color 2" );
+  floorFolder.add( gui_parameters, 'recolorfloor' ).name( "Paint Floor" );
+
+  var floorNumber1 = floorFolder.add( gui_parameters, 'floorpnumber1' )
+          .name( "Number 1" );
+  var floorNumber2 = floorFolder.add( gui_parameters, 'floorpnumber2' )
+          .name( "Number 2" );
+  var floorVisible = floorFolder.add( gui_parameters, 'floorvisible' )
+          .name( "Visible?" );
+
+  var modelselector = gui.add( gui_parameters, 'model',
+                [ "None", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+          .onChange( function(value) { changeModel( value ) } );
+
+
+
+  function paintfloor()
+  {
+    color1x = parseInt( gui_parameters.floorcolor1.replace("#","0x") );
+    var color1 = new THREE.Color( color1x );
+    color2x = parseInt( gui_parameters.floorcolor2.replace("#","0x") );
+    var color2 = new THREE.Color( color2x );
+    var newfloor = makeFloor( color1, color2,
+          gui_parameters.floorpnumber1, gui_parameters.floorpnumber2 ) ;
+    newfloor.visible = gui_parameters.floorvisible;
+    scene.remove( scene.getObjectByName( "FlOoR", false ) );
+    scene.add( newfloor );
+  }
+
+  function changeModel( value ) 
+  {
+    scene.remove( scene.getObjectByName( "HeDrOn", false ) );
+    if( value == "None" ){
+        mesh = new THREE.Mesh( );
+        scene.add( mesh );  // FIXME-- is empty mesh reasonable?
+    } else if( value == "Flag" ){
+        mesh = makeFoo();
+        scene.add( mesh );
+    } else if( value == "Icosahedron" ){
+        var geometry = new THREE.IcosahedronGeometry( 30, 0 );
+        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+        mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set(0,40,0);
+        scene.add(mesh);
+    } else if( value == "Sphere" ){
+        var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+        mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set(0,40,0);
+        scene.add(mesh);
+    } else if( value == "Cube" ){
+      mesh = Vertex_Colors();
+      scene.add( mesh );
+    }
+    mesh.name = "HeDrOn";
+
+
+  }
+
+	////////////
+	// CUSTOM //
+	////////////
+	
+  if( false ){
+	//var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+	var geometry = new THREE.IcosahedronGeometry( 30, 0 );
+	//var material = new THREE.MeshLambertMaterial( { color: 0x000088 } );
+	var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+	mesh = new THREE.Mesh( geometry, material );
+	mesh.position.set(0,40,0);
+	scene.add(mesh);
+  mesh.name = "HeDrOn";
+  }
+
+  // scene.add( Vertex_Colors() );
+ //  scene.add( makeFoo() );
+}
+
+function animate() 
+{
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update()
+{
+	/*****************
+  if ( keyboard.pressed("z") ) 
+	{	  
+		// do something
+	}
+	************************/
+//////////////////////	controls.update();
+	camera.up = new THREE.Vector3(0,1,0);
+	//////////////////stats.update();
+}
+
+function render() 
+{
+	renderer.render( scene, camera );
+}
+
+function makeFloor( color1, color2, num1, num2 )
+{
+    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+
+    /****************
+    for( var i = 0; i < floorGeometry.faces.length; i += 2 ){
+      face  = floorGeometry.faces[ i ];	
+      face.color.set(color1);		
+      face  = floorGeometry.faces[ i + 1 ];	
+      face.color.set( color2 );
+    }
+    *************/
+    var i = 0;
+    while( i + num1 + num2 <= floorGeometry.faces.length ){
+      for( var j = 0; j < num1; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color1);		
+        i += 1;
+      }
+      for( var j = 0; j < num2; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color2);		
+        i += 1;
+      }
+
+    }
+
+    var floorMaterial = new THREE.MeshBasicMaterial(
+      { color: 0xffffff, vertexColors: THREE.FaceColors, side: THREE.DoubleSide } );
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.y = -0.5;
+    floor.rotation.x = Math.PI / 2;
+    floor.name = "FlOoR";
+
+    return floor;
+}
+
+function Vertex_Colors() 
+{
+	// this material causes a mesh to use colors assigned to faces
+	var cubeMaterial = new THREE.MeshBasicMaterial( 
+	{ color: 0xffffff, vertexColors: THREE.FaceColors } );
+	
+	var cubeGeometry = new THREE.CubeGeometry( 80, 80, 80, 3, 3, 3 );
+	for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
+	{
+		face  = cubeGeometry.faces[ i ];	
+		face.color.setRGB( Math.random(), Math.random(), Math.random() );		
+	}
+	cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
+	cube.position.set(-100, 50, 0);
+	return cube;
+}
+
+function makeFoo()
+{
+  var geometry = new THREE.Geometry();
+
+  geometry.vertices.push( new THREE.Vector3( 0, 100, 0) );
+  geometry.vertices.push( new THREE.Vector3( 0, 0, 0) );
+  geometry.vertices.push( new THREE.Vector3( 100, 0, 0) );
+  geometry.vertices.push( new THREE.Vector3( 100, 100, 0) );
+
+  geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+  geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+  geometry.faces[0].color.setHex(0xdd0000) ;
+  geometry.faces[1].color.setHex(0x0000dd) ;
+
+  var material = new THREE.MeshBasicMaterial(
+      { vertexColors: THREE.FaceColors,
+        wireframe: false,
+        color: 0xffffff } );
+
+  var mesh = new THREE.Mesh( geometry, material ) ;
+  return mesh;
+}
+
+
+</script>
+
+</body>
+</html>
