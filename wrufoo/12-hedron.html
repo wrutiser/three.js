@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Template (Three.js)</title>
+    <title> 12-Hedron </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <!--
@@ -11,56 +11,29 @@
 <body>
 
 <script src="../build/Three.js"></script>
-<!--
-<script src="js/Detector.js"></script>
-<script src="js/Stats.js"></script>
-<script src="js/OrbitControls.js"></script>
-<script src="js/THREEx.KeyboardState.js"></script>
-<script src="js/THREEx.FullScreen.js"></script>
-<script src="js/THREEx.WindowResize.js"></script>
--->
 
 <script src="../examples/js/controls/OrbitControls.js"></script>
 <script src="libs/DAT.GUI.min.js"></script>
 
-
-<!-- Code to display an information button and box when clicked. -->
-<!--
-<script src="js/jquery-1.9.1.js"></script>
-<script src="js/jquery-ui.js"></script>
-<link rel=stylesheet href="css/jquery-ui.css" />
-<link rel=stylesheet href="css/info.css"/>
-<script src="js/info.js"></script>
-<div id="infoButton"></div>
-<div id="infoBox" title="Demo Information">
-This three.js demo is part of a collection at
-<a href="http://stemkoski.github.io/Three.js/">http://stemkoski.github.io/Three.js/</a>
-</div>
--->
 <!-- ------------------------------------------------------------ -->
 
-<!--
-<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>  
-<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px;"></div>
-<div id="ThreeJS'> </div>
-<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:100px"></div>  
--->
 
 <div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
 
 <script>
 /*
+This is based on template.html which is derived from:
 	Three.js "tutorials by example"
 	Author: Lee Stemkoski
 	Date: July 2013 (three.js v59dev)
- */
+
+Unneed code has been removed. Restore as needed.
+*/
 
 // MAIN
 
 // standard global variables
 var container, scene, camera, renderer, controls, stats;
-///// var keyboard = new THREEx.KeyboardState();
-var clock = new THREE.Clock();
 
 // custom global variables
 var mesh;
@@ -81,29 +54,14 @@ function init()
 	camera.position.set(0,150,400);
 	camera.lookAt(scene.position);	
 	// RENDERER
-  /*******
-	if ( Detector.webgl )
-		renderer = new THREE.WebGLRenderer( {antialias:true} );
-	else
-		renderer = new THREE.CanvasRenderer(); 
-  ******/  
   renderer = new THREE.WebGLRenderer( {antialias:true} );
 	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	container = document.getElementById( 'ThreeJS' );
 	container.appendChild( renderer.domElement );
 	// EVENTS
-	//////////////// THREEx.WindowResize(renderer, camera);
-	//////////////// THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
-  /****************
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
-  *****************/
 	// LIGHT
 	var light = new THREE.PointLight(0xffffff);
 	light.position.set(100,250,100);
