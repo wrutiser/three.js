@@ -112,7 +112,7 @@ function init()
           .name( "Visible?" );
 
   var modelselector = gui.add( gui_parameters, 'model',
-                [ "None", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+                [ "None", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -135,34 +135,27 @@ function init()
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
     if( value == "None" ){
         mesh = new THREE.Mesh( );
-        scene.add( mesh );  // FIXME-- is empty mesh reasonable?
     } else if( value == "Pentagon" ) {
-        var geometry = new PentagonGeometry( 30 );
-        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
-        mesh = new THREE.Mesh( geometry, material );
-        mesh.position.set(0,40,0);
-        scene.add(mesh);
+        mesh = ngonModel( 5, 30 );
+    } else if( value == "Hexagon" ) {
+        mesh = ngonModel( 6, 30 );
     } else if( value == "Flag" ){
         mesh = makeFoo();
-        scene.add( mesh );
     } else if( value == "Icosahedron" ){
         var geometry = new THREE.IcosahedronGeometry( 30, 0 );
         var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
         mesh = new THREE.Mesh( geometry, material );
         mesh.position.set(0,40,0);
-        scene.add(mesh);
     } else if( value == "Sphere" ){
         var geometry = new THREE.SphereGeometry( 30, 32, 16 );
         var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
         mesh = new THREE.Mesh( geometry, material );
         mesh.position.set(0,40,0);
-        scene.add(mesh);
     } else if( value == "Cube" ){
       mesh = Vertex_Colors();
-      scene.add( mesh );
     }
+    scene.add( mesh );
     mesh.name = "HeDrOn";
-
 
   }
 
@@ -170,7 +163,8 @@ function init()
 	// CUSTOM //
 	////////////
 	
-  changeModel( "Pentagon" );
+//  changeModel( "Pentagon" ); // FIXME -- temp for WIP
+  changeModel( "Hexagon" ); // FIXME -- temp for WIP
 }
 
 function animate() 
@@ -198,42 +192,47 @@ function render()
 	renderer.render( scene, camera );
 }
 
-function PentagonGeometry( radius )
+function ngonGeometry( n, radius )
 {
   var geometry = new THREE.Geometry();
-  var delta_theta = (2 * Math.PI ) / 5;
+  geometry.vertices = ngonVertices( n, radius );
+  for( var i = 1; i < n; i += 1 )
+  {
+    geometry.faces.push( new THREE.Face3( 0, i, i + 1 ) );
+  }
+  geometry.faces.push( new THREE.Face3( 0, n, 1 ) );
+  geometry.computeBoundingSphere();
+  return geometry ;
+}
 
-  var i;
-  for( i = 0; i < 6; i += 1 )
+function ngonVertices( n, radius )
+{
+  var delta_theta = (2 * Math.PI ) / n;
+  var vertices = [];
+  for( var i = 0; i <= n; i += 1 )
   {
     var theta = i * delta_theta;
     var x = Math.cos( theta ) * radius
     var y = Math.sin( theta ) * radius
-    geometry.vertices.push( new THREE.Vector3( x, y, 0 ) );
+    vertices.push( new THREE.Vector3( x, y, 0 ) );
   }
-  
-  geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
-  geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
-  geometry.faces.push( new THREE.Face3( 0, 3, 4 ) );
-  geometry.faces.push( new THREE.Face3( 0, 4, 5 ) );
-  geometry.faces.push( new THREE.Face3( 0, 5, 1 ) );
-
-  geometry.computeBoundingSphere();
-  return geometry ;
+  return vertices ;
 }
+
+function ngonModel( n, radius )
+{
+    var geometry = new ngonGeometry( n, radius );
+    var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.position.set(0,40,0);
+    scene.add(mesh);
+    return mesh;
+}        
 
 function makeFloor( color1, color2, num1, num2 )
 {
     var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
 
-    /****************
-    for( var i = 0; i < floorGeometry.faces.length; i += 2 ){
-      face  = floorGeometry.faces[ i ];	
-      face.color.set(color1);		
-      face  = floorGeometry.faces[ i + 1 ];	
-      face.color.set( color2 );
-    }
-    *************/
     var i = 0;
     while( i + num1 + num2 <= floorGeometry.faces.length ){
       for( var j = 0; j < num1; j += 1 ){
