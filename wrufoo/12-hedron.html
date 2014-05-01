@@ -112,7 +112,7 @@ function init()
           .name( "Visible?" );
 
   var modelselector = gui.add( gui_parameters, 'model',
-                [ "None", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+                [ "None", "ButterFly", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -135,6 +135,8 @@ function init()
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
     if( value == "None" ){
         mesh = new THREE.Mesh( );
+    } else if( value == "ButterFly" ) {
+        mesh = butterFlyModel( 30 );
     } else if( value == "Pentagon" ) {
         mesh = ngonModel( 5, 30 );
     } else if( value == "Hexagon" ) {
@@ -164,7 +166,8 @@ function init()
 	////////////
 	
 //  changeModel( "Pentagon" ); // FIXME -- temp for WIP
-  changeModel( "Hexagon" ); // FIXME -- temp for WIP
+  // changeModel( "Hexagon" ); // FIXME -- temp for WIP
+  changeModel( "ButterFly" ); // FIXME -- temp for WIP
 }
 
 function animate() 
@@ -191,6 +194,40 @@ function render()
 {
 	renderer.render( scene, camera );
 }
+
+function butterFlyModel( outRadius )
+{
+  inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
+  var y_axis = new THREE.Vector3(0,1,0);
+  var z_axis = new THREE.Vector3(0,0,1);
+
+  var obj0 = new THREE.Object3D();    
+  var obj1 = new THREE.Object3D();    
+  var obj2 = new THREE.Object3D();    
+  var obj3 = new THREE.Object3D();    
+
+  var geometry = new ngonGeometry( 5, outRadius );
+  var material = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+  var mesh = new THREE.Mesh( geometry, material );
+
+  obj0.add( mesh );
+  obj0.translateX( inRadius );
+  
+  obj1.add( obj0 );
+  obj1.rotateOnAxis( y_axis, -148 * Math.PI / 180 );
+
+  obj2.add( obj1.clone() );
+  
+  obj2.rotateOnAxis( z_axis, Math.PI );
+
+  obj3.add( obj1 );
+  obj3.add( obj2 );
+  obj3.position.set(0,40,0);
+
+  scene.add(obj3);
+  return obj3;
+}
+
 
 function ngonGeometry( n, radius )
 {
