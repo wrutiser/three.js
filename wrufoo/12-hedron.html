@@ -112,7 +112,7 @@ function init()
           .name( "Visible?" );
 
   var modelselector = gui.add( gui_parameters, 'model',
-                [ "None", "ButterFly", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+                [ "None", "FooBarb", "ButterFly", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -135,6 +135,8 @@ function init()
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
     if( value == "None" ){
         mesh = new THREE.Mesh( );
+    } else if( value == "FooBarb" ) {
+        mesh = fooBarbModel( 30 );
     } else if( value == "ButterFly" ) {
         mesh = butterFlyModel( 30 );
     } else if( value == "Pentagon" ) {
@@ -167,7 +169,8 @@ function init()
 	
 //  changeModel( "Pentagon" ); // FIXME -- temp for WIP
   // changeModel( "Hexagon" ); // FIXME -- temp for WIP
-  changeModel( "ButterFly" ); // FIXME -- temp for WIP
+  // changeModel( "ButterFly" ); // FIXME -- temp for WIP
+  changeModel( "FooBarb" ); // FIXME -- temp for WIP
 }
 
 function animate() 
@@ -193,6 +196,19 @@ function update()
 function render() 
 {
 	renderer.render( scene, camera );
+}
+
+function fooBarbModel( size )
+{
+  var RPD  = Math.PI / 180;
+  var boxGeometry = new THREE.BoxGeometry( size, 2 * size, 3 * size );
+  var material = new THREE.MeshNormalMaterial( );
+  var boxMesh = new THREE.Mesh( boxGeometry, material );
+//  boxMesh.position.x = 50;
+  boxMesh.rotation.x = 45 * RPD;
+  boxMesh.rotation.y = 22 * RPD;
+  scene.add( boxMesh );
+  return boxMesh;
 }
 
 function butterFlyModel( outRadius )
