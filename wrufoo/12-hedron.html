@@ -168,8 +168,8 @@ function init()
 	////////////
 	
 //  changeModel( "Pentagon" ); // FIXME -- temp for WIP
-  // changeModel( "Hexagon" ); // FIXME -- temp for WIP
-  // changeModel( "ButterFly" ); // FIXME -- temp for WIP
+//  changeModel( "Hexagon" ); // FIXME -- temp for WIP
+//  changeModel( "ButterFly" ); // FIXME -- temp for WIP
   changeModel( "FooBarb" ); // FIXME -- temp for WIP
 }
 
@@ -200,6 +200,43 @@ function render()
 
 function fooBarbModel( size )
 {
+  var redBallMesh = new THREE.Mesh(
+        new THREE.SphereGeometry( 20 ),
+        new THREE.MeshLambertMaterial( {color: 0xff0000} )
+      );
+  redBallMesh.position.x = 500;
+  scene.add( redBallMesh );
+
+  var greenBallMesh = new THREE.Mesh(
+        new THREE.SphereGeometry( 20 ),
+        new THREE.MeshLambertMaterial( {color: 0x00ff00} )
+      );
+  greenBallMesh.position.y = 500;
+  scene.add( greenBallMesh );
+
+  var blueBallMesh = new THREE.Mesh(
+        new THREE.SphereGeometry( 20 ),
+        new THREE.MeshLambertMaterial( {color: 0x0000ff} )
+      );
+  blueBallMesh.position.z = 500;
+  scene.add( blueBallMesh );
+
+  var mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry( 0, 20, 200 ),
+        new THREE.MeshLambertMaterial( {color: 0xff0000} )
+      );
+  mesh.rotation.z = Math.PI / 4;
+  mesh.position.x = 50;
+  mesh.translateOnAxis( new THREE.Vector3(1,0,0), 50 );
+  console.log(mesh.position);
+  console.log( mesh.rotation );
+  console.log( mesh.matrix );
+  scene.add( mesh );
+  return mesh;
+}
+
+function fooBarbModel0( size )
+{
   var RPD  = Math.PI / 180;
   var boxGeometry = new THREE.BoxGeometry( size, 2 * size, 3 * size );
   var material = new THREE.MeshNormalMaterial( );
@@ -211,7 +248,7 @@ function fooBarbModel( size )
   return boxMesh;
 }
 
-function butterFlyModel( outRadius )
+function butterFlyModel0( outRadius )
 {
   inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
   var y_axis = new THREE.Vector3(0,1,0);
@@ -244,16 +281,77 @@ function butterFlyModel( outRadius )
   return obj3;
 }
 
+function butterFlyModel( outRadius )
+{
+  var RPD  = Math.PI / 180;
+  inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
+  dihedralAngle = 115 * RPD ;
+  var y_axis = new THREE.Vector3(0,1,0);
+  var z_axis = new THREE.Vector3(0,0,1);
+
+  var geometry = new ngonGeometry( 5, outRadius );
+  var material = new THREE.MeshNormalMaterial( { side: THREE.DoubleSide } );
+
+  // Left side
+  var mesh1 = new THREE.Mesh( geometry, material );
+  mesh1.position.x = inRadius;
+  mesh1.position.y = inRadius;  // raised
+  var obj1 = new THREE.Object3D();    
+  obj1.add( mesh1 );
+  obj1.rotation.y = (3 * Math.PI - dihedralAngle) / 2; 
+  
+  // Right side`
+  var mesh2 = new THREE.Mesh( geometry, material );
+  mesh2.position.x = inRadius;
+  mesh2.position.y = inRadius;  // raised
+  mesh2.rotation.x = Math.PI;
+  var obj2 = new THREE.Object3D();    
+  obj2.add( mesh2 );
+  obj2.rotation.y = -( Math.PI - dihedralAngle) / 2; 
+
+  var obj3 = new THREE.Object3D();    
+  obj3.add( obj1 );
+  obj3.add( obj2 );
+  
+  scene.add( obj3 );
+  return obj3;
+/***********************
+  var obj0 = new THREE.Object3D();    
+  var obj1 = new THREE.Object3D();    
+  var obj2 = new THREE.Object3D();    
+  var obj3 = new THREE.Object3D();    
+
+
+  obj0.add( mesh );
+  obj0.translateX( inRadius );
+  
+  obj1.add( obj0 );
+  obj1.rotateOnAxis( y_axis, -148 * Math.PI / 180 );
+
+  obj2.add( obj1.clone() );
+  
+  obj2.rotateOnAxis( z_axis, Math.PI );
+
+  obj3.add( obj1 );
+  obj3.add( obj2 );
+  obj3.position.set(0,40,0);
+
+  scene.add(obj3);
+  return obj3;
+  *****************/
+}
+
 
 function ngonGeometry( n, radius )
 {
   var geometry = new THREE.Geometry();
   geometry.vertices = ngonVertices( n, radius );
+  var normal = new THREE.Vector3( 0, 0, 1 );
   for( var i = 1; i < n; i += 1 )
   {
-    geometry.faces.push( new THREE.Face3( 0, i, i + 1 ) );
+    geometry.faces.push( new THREE.Face3( 0, i, i + 1, normal ) );
   }
-  geometry.faces.push( new THREE.Face3( 0, n, 1 ) );
+  geometry.faces.push( new THREE.Face3( 0, n, 1, normal ) );
   geometry.computeBoundingSphere();
   return geometry ;
 }
