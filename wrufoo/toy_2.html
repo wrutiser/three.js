@@ -13,15 +13,32 @@
 
       var fooVars = {
           fooNumber: 100,
+          fooNumSlider: 0,
           fooString: "xyzzy",
-          fooBoolean: false
+          fooBoolean: false,
+     // }
+   //   var fooOrigamists = {
+          fooFirst: 'Lang',
+          fooSecond: 'Montroll'          
       }
 
       console.log( "Hello" );
 
       fooNumberController = fooGui.add(fooVars, "fooNumber");
+
+      fooNumSliderController = fooGui.add(fooVars, "fooNumSlider" )
+                .min(-100).max(100).step(10)
+                .onChange( function( newValue ) {
+                    console.log( "fooNumSlider changed to" + newValue );
+                } )
+                .onFinishChange( function( newValue ) {
+                      console.log( "fooNumSlider finished changing to "
+                                 + newValue);
+                } );   
+
+
       fooStringController = fooGui.add(fooVars, "fooString");
-      fooBooleanController = fooGui.add(fooVars, "fooBoolean");
+      fooBooleanController = fooGui.add(fooVars, "fooBoolean").name('Toggle Me');
 
       fooStringController.onChange( function( newValue ) {
           console.log( "fooString changed to " + newValue );
@@ -37,6 +54,10 @@
           console.log( "fooBoolean changed to " + newValue );
         }
       );
+      
+      fooFolder1 = fooGui.addFolder( 'Origamists' ) ;
+      fooFolder1.add( fooVars, 'fooFirst' );
+      fooFolder1.add( fooVars, 'fooSecond' );
   }
     </script>
 </head>
