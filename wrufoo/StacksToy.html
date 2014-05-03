@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title> StackToy (Three.js)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!--
+    <link rel=stylesheet href="css/base.css"/>
+-->
+</head>
+<body>
+
+<script src="../build/Three.js"></script>
+<script src="../examples/js/controls/OrbitControls.js"></script>
+<script src="libs/DAT.GUI.min.js"></script>
+
+
+<!-- Code to display an information button and box when clicked. -->
+
+<div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
+
+<script>
+/*
+	Three.js "tutorials by example"
+	Author: Lee Stemkoski
+	Date: July 2013 (three.js v59dev)
+ */
+
+// MAIN
+
+// standard global variables
+var container, scene, camera, renderer, controls, stats;
+///// var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+
+// custom global variables
+var mesh;
+
+init();
+animate();
+
+// FUNCTIONS 		
+function init() 
+{
+	// SCENE
+	scene = new THREE.Scene();
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,150,400);
+	camera.lookAt(scene.position);	
+	// RENDERER
+  /*******
+	if ( Detector.webgl )
+		renderer = new THREE.WebGLRenderer( {antialias:true} );
+	else
+		renderer = new THREE.CanvasRenderer(); 
+  ******/  
+  renderer = new THREE.WebGLRenderer( {antialias:true} );
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.getElementById( 'ThreeJS' );
+	container.appendChild( renderer.domElement );
+	// EVENTS
+	//////////////// THREEx.WindowResize(renderer, camera);
+	//////////////// THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	// STATS
+  /****************
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
+  *****************/
+	// LIGHT
+	var light = new THREE.PointLight(0xffffff);
+	light.position.set(1000,2500,6000);
+	scene.add(light);
+  var amblight = new THREE.AmbientLight( 0x555555 );
+  scene.add(amblight);
+  
+  var color1 = new THREE.Color( 0x777777 ) ;
+  var color2 = new THREE.Color( 0xeeeeee ) ;
+  scene.add( makeFloor( color1, color2, 1, 1 ));
+  scene.add( new THREE.AxisHelper(500) );
+
+	// SKYBOX
+	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+	scene.add(skyBox);
+	
+	////////////
+	//  GUI   //
+	////////////
+
+  var gui = new dat.GUI();
+  gui_parameters =
+  {
+    floorcolor1:  "#777777",
+    floorcolor2:  "#eeeeee",
+    floorpnumber1: 1,
+    floorpnumber2: 1,
+    floorvisible: true,
+    recolorfloor: function(){ paintfloor(); },
+    model: "Flag",                  
+
+    orangeIncX: function() {orangeBox.position.x += 10; },
+    orangeDecX: function() {orangeBox.position.x -= 10; },
+    yellowIncX: function() {yellowBox.position.x += 10; },
+    yellowDecX: function() {yellowBox.position.x -= 10; },
+
+    orangeCCWY: function() {orangeBox.rotation.y += Math.PI / 10; },
+    orangeCWY: function() {orangeBox.rotation.y -= Math.PI / 10; },
+    yellowCCWY: function() {yellowBox.rotation.y += Math.PI / 10; },
+    yellowCWY: function() {yellowBox.rotation.y -= Math.PI / 10; },
+
+    orangeROAZ: function() {orangeBox.rotateOnAxis( new THREE.Vector3(0,0,1),
+        Math.PI/10); console.log('orangeROAZ') },
+
+    yellowROAX: function() {yellowBox.rotateOnAxis( new THREE.Vector3(1,0,0),
+        Math.PI/10); console.log('yellowROAZ') },
+    yellowROAY: function() {yellowBox.rotateOnAxis( new THREE.Vector3(0,1,0),
+        Math.PI/10); console.log('yellowROAZ') },
+    yellowROAZ: function() {yellowBox.rotateOnAxis( new THREE.Vector3(0,0,1),
+        Math.PI/10); console.log('yellowROAZ') },
+  }
+
+  var floorFolder = gui.addFolder( 'Floor' );
+
+  var floorColor1 = floorFolder.addColor( gui_parameters, 'floorcolor1' )
+          .name( "Color 1" );
+  var floorColor2 = floorFolder.addColor( gui_parameters, 'floorcolor2' ) 
+          .name( "Color 2" );
+  floorFolder.add( gui_parameters, 'recolorfloor' ).name( "Paint Floor" );
+
+  var floorNumber1 = floorFolder.add( gui_parameters, 'floorpnumber1' )
+          .name( "Number 1" );
+  var floorNumber2 = floorFolder.add( gui_parameters, 'floorpnumber2' )
+          .name( "Number 2" );
+  var floorVisible = floorFolder.add( gui_parameters, 'floorvisible' )
+          .name( "Visible?" );
+
+  gui.add( gui_parameters, 'orangeIncX') ; 
+  gui.add( gui_parameters, 'orangeDecX') ; 
+
+  gui.add( gui_parameters, 'orangeCCWY') ;
+  gui.add( gui_parameters, 'orangeCWY') ;
+
+  gui.add( gui_parameters, 'orangeROAZ') ;
+  
+  gui.add( gui_parameters, 'yellowIncX') ; 
+  gui.add( gui_parameters, 'yellowDecX') ; 
+
+  gui.add( gui_parameters, 'yellowCCWY') ;
+  gui.add( gui_parameters, 'yellowCWY') ;
+
+  gui.add( gui_parameters, 'yellowROAX') ;
+  gui.add( gui_parameters, 'yellowROAY') ;
+  gui.add( gui_parameters, 'yellowROAZ') ;
+
+  var redBox = makeBoxMesh( 700, 20, 200, "red", 20/2 );
+  scene.add( redBox );
+
+  var orangeBox = makeBoxMesh( 300, 30, 190, "orange", 30/2 + 20/2);
+  redBox.add( orangeBox );
+
+  var yellowBox = makeBoxMesh( 200, 50, 180, "yellow", 50/2 + 30/2 );
+  orangeBox.add( yellowBox );
+
+  function paintfloor()
+  {
+    color1x = parseInt( gui_parameters.floorcolor1.replace("#","0x") );
+    var color1 = new THREE.Color( color1x );
+    color2x = parseInt( gui_parameters.floorcolor2.replace("#","0x") );
+    var color2 = new THREE.Color( color2x );
+    var newfloor = makeFloor( color1, color2,
+          gui_parameters.floorpnumber1, gui_parameters.floorpnumber2 ) ;
+    newfloor.visible = gui_parameters.floorvisible;
+    scene.remove( scene.getObjectByName( "FlOoR", false ) );
+    scene.add( newfloor );
+  }
+
+  function makeBoxMesh( width, height, depth, color, raise )
+  {
+    mesh = new THREE.Mesh(
+        new THREE.BoxGeometry( width, height, depth ),
+        new THREE.MeshLambertMaterial( {color: color, ambient: color} )
+      );
+ 
+      mesh.position.y = raise;
+ //   mesh.position.y = height;
+  //  mesh.position.y = height / 2 ;
+//    mesh.position.y = 3 * height / 2 ;
+  //  mesh.position.y = height / 2 + raise;
+    
+    if( false ) {
+      obj = new THREE.Object3D();
+      obj.add( mesh );
+      return obj;
+    } else {
+      return mesh;
+    }
+  }
+
+
+	////////////
+	// CUSTOM //
+	////////////
+	
+}
+
+function animate() 
+{
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update()
+{
+	/*****************
+  if ( keyboard.pressed("z") ) 
+	{	  
+		// do something
+	}
+	************************/
+//////////////////////	controls.update();
+	camera.up = new THREE.Vector3(0,1,0);
+	//////////////////stats.update();
+}
+
+function render() 
+{
+	renderer.render( scene, camera );
+}
+
+function makeFloor( color1, color2, num1, num2 )
+{
+    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+
+    var i = 0;
+    while( i + num1 + num2 <= floorGeometry.faces.length ){
+      for( var j = 0; j < num1; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color1);		
+        i += 1;
+      }
+      for( var j = 0; j < num2; j += 1 ){
+        face  = floorGeometry.faces[ i ];	
+        face.color.set(color2);		
+        i += 1;
+      }
+    }
+
+    var floorMaterial = new THREE.MeshBasicMaterial(
+      { color: 0xffffff, vertexColors: THREE.FaceColors, side: THREE.DoubleSide } );
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.y = -0.5;
+    floor.rotation.x = Math.PI / 2;
+    floor.name = "FlOoR";
+
+    return floor;
+}
+
+
+
+
+</script>
+
+</body>
+</html>
