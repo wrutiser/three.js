@@ -112,7 +112,7 @@ function init()
           .name( "Visible?" );
 
   var modelselector = gui.add( gui_parameters, 'model',
-                [ "None", "FooBarb", "ButterFly", "Hexagon", "Pentagon", "Flag", "Icosahedron", "Sphere", "Cube" ] )
+                [ "None", "ButterFly", "WIP" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -133,30 +133,15 @@ function init()
   function changeModel( value ) 
   {
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
+    
     if( value == "None" ){
         mesh = new THREE.Mesh( );
-    } else if( value == "FooBarb" ) {
-        mesh = fooBarbModel( 30 );
+    } else if( value == "WIP" ) {
+        mesh = WIPModel( 50 );
     } else if( value == "ButterFly" ) {
         mesh = butterFlyModel( 30 );
-    } else if( value == "Pentagon" ) {
-        mesh = ngonModel( 5, 30 );
-    } else if( value == "Hexagon" ) {
-        mesh = ngonModel( 6, 30 );
-    } else if( value == "Flag" ){
-        mesh = makeFoo();
-    } else if( value == "Icosahedron" ){
-        var geometry = new THREE.IcosahedronGeometry( 30, 0 );
-        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
-        mesh = new THREE.Mesh( geometry, material );
-        mesh.position.set(0,40,0);
-    } else if( value == "Sphere" ){
-        var geometry = new THREE.SphereGeometry( 30, 32, 16 );
-        var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
-        mesh = new THREE.Mesh( geometry, material );
-        mesh.position.set(0,40,0);
-    } else if( value == "Cube" ){
-      mesh = Vertex_Colors();
+    } else {
+      mesh = new THREE.Mesh();
     }
     scene.add( mesh );
     mesh.name = "HeDrOn";
@@ -167,10 +152,7 @@ function init()
 	// CUSTOM //
 	////////////
 	
-//  changeModel( "Pentagon" ); // FIXME -- temp for WIP
-//  changeModel( "Hexagon" ); // FIXME -- temp for WIP
-//  changeModel( "ButterFly" ); // FIXME -- temp for WIP
-  changeModel( "FooBarb" ); // FIXME -- temp for WIP
+  changeModel( "WIP" ); // FIXME -- temp for WIP
 }
 
 function animate() 
@@ -198,54 +180,45 @@ function render()
 	renderer.render( scene, camera );
 }
 
-function fooBarbModel( size )
+
+function WIPModel( outRadius )
 {
-  var redBallMesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 20 ),
-        new THREE.MeshLambertMaterial( {color: 0xff0000} )
-      );
-  redBallMesh.position.x = 500;
-  scene.add( redBallMesh );
+  var RPD = Math.PI / 180;
+  var inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
+  var DiHedralAngle = 120; ////// FIXME a guess
 
-  var greenBallMesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 20 ),
-        new THREE.MeshLambertMaterial( {color: 0x00ff00} )
+  var geometry = new ngonGeometry( 5, outRadius );
+  var material = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: 0x999900 }
       );
-  greenBallMesh.position.y = 500;
-  scene.add( greenBallMesh );
+  var mesh = new THREE.Mesh( geometry, material );
+  var mesh1 = mesh.clone();
 
-  var blueBallMesh = new THREE.Mesh(
-        new THREE.SphereGeometry( 20 ),
-        new THREE.MeshLambertMaterial( {color: 0x0000ff} )
-      );
-  blueBallMesh.position.z = 500;
-  scene.add( blueBallMesh );
 
-  var mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry( 0, 20, 200 ),
-        new THREE.MeshLambertMaterial( {color: 0xff0000} )
-      );
-  mesh.rotation.z = Math.PI / 4;
-  mesh.position.x = 50;
-  mesh.translateOnAxis( new THREE.Vector3(1,0,0), 50 );
-  console.log(mesh.position);
-  console.log( mesh.rotation );
-  console.log( mesh.matrix );
-  scene.add( mesh );
-  return mesh;
-}
+  var x_axis = new THREE.Vector3(1,0,0);
+  var y_axis = new THREE.Vector3(0,1,0);
+  var z_axis = new THREE.Vector3(0,0,1);
 
-function fooBarbModel0( size )
-{
-  var RPD  = Math.PI / 180;
-  var boxGeometry = new THREE.BoxGeometry( size, 2 * size, 3 * size );
-  var material = new THREE.MeshNormalMaterial( );
-  var boxMesh = new THREE.Mesh( boxGeometry, material );
-//  boxMesh.position.x = 50;
-  boxMesh.rotation.x = 45 * RPD;
-  boxMesh.rotation.y = 22 * RPD;
-  scene.add( boxMesh );
-  return boxMesh;
+  var e_axis = new THREE.Vector3( Math.cos( 18 * RPD), Math.sin( (108 - 90 ) * RPD), 0 );  
+
+  mesh1.rotation.z = 36 * RPD;
+  obj1 = new THREE.Object3D();
+  obj1.add(mesh1);
+
+  mesh1.rotateOnAxis( e_axis, (20) * RPD );
+  //mesh1.rotateOnAxis( e_axis, (180 - 148) * RPD );
+
+//  var DHA = 148 * Math.PI / 180 ; 
+//  mesh1.rotateOnAxis( x_axis, DHA );
+//  mesh1.rotateOnAxis( z_axis, DHA );
+
+  var gap = 5;
+  //obj1.position.x = -gap + 2 * inRadius * Math.cos( 1.5 * 72 * RPD );
+  //obj1.position.y = gap + 2 * inRadius * Math.sin( 1.5 * 72 * RPD );
+  obj = new THREE.Object3D();
+ // obj.add( mesh );
+  obj.add( obj1 );
+  return obj;
 }
 
 function butterFlyModel0( outRadius )
@@ -315,30 +288,6 @@ function butterFlyModel( outRadius )
   
   scene.add( obj3 );
   return obj3;
-/***********************
-  var obj0 = new THREE.Object3D();    
-  var obj1 = new THREE.Object3D();    
-  var obj2 = new THREE.Object3D();    
-  var obj3 = new THREE.Object3D();    
-
-
-  obj0.add( mesh );
-  obj0.translateX( inRadius );
-  
-  obj1.add( obj0 );
-  obj1.rotateOnAxis( y_axis, -148 * Math.PI / 180 );
-
-  obj2.add( obj1.clone() );
-  
-  obj2.rotateOnAxis( z_axis, Math.PI );
-
-  obj3.add( obj1 );
-  obj3.add( obj2 );
-  obj3.position.set(0,40,0);
-
-  scene.add(obj3);
-  return obj3;
-  *****************/
 }
 
 
@@ -380,6 +329,9 @@ function ngonModel( n, radius )
     return mesh;
 }        
 
+
+// Floor
+
 function makeFloor( color1, color2, num1, num2 )
 {
     var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
@@ -408,47 +360,6 @@ function makeFloor( color1, color2, num1, num2 )
 
     return floor;
 }
-
-function Vertex_Colors() 
-{
-	// this material causes a mesh to use colors assigned to faces
-	var cubeMaterial = new THREE.MeshBasicMaterial( 
-	{ color: 0xffffff, vertexColors: THREE.FaceColors } );
-	
-	var cubeGeometry = new THREE.CubeGeometry( 80, 80, 80, 3, 3, 3 );
-	for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
-	{
-		face  = cubeGeometry.faces[ i ];	
-		face.color.setRGB( Math.random(), Math.random(), Math.random() );		
-	}
-	cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-	cube.position.set(-100, 50, 0);
-	return cube;
-}
-
-function makeFoo()
-{
-  var geometry = new THREE.Geometry();
-
-  geometry.vertices.push( new THREE.Vector3( 0, 100, 0) );
-  geometry.vertices.push( new THREE.Vector3( 0, 0, 0) );
-  geometry.vertices.push( new THREE.Vector3( 100, 0, 0) );
-  geometry.vertices.push( new THREE.Vector3( 100, 100, 0) );
-
-  geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
-  geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
-  geometry.faces[0].color.setHex(0xdd0000) ;
-  geometry.faces[1].color.setHex(0x0000dd) ;
-
-  var material = new THREE.MeshBasicMaterial(
-      { vertexColors: THREE.FaceColors,
-        wireframe: false,
-        color: 0xffffff } );
-
-  var mesh = new THREE.Mesh( geometry, material ) ;
-  return mesh;
-}
-
 
 </script>
 
