@@ -34,6 +34,7 @@ Unneed code has been removed. Restore as needed.
 
 // standard global variables
 var container, scene, camera, renderer, controls, stats;
+var RPD = Math.PI / 180;
 
 // custom global variables
 var mesh;
@@ -180,44 +181,66 @@ function render()
 	renderer.render( scene, camera );
 }
 
+function polarVec( r, degrees )
+{
+  var radians = degrees * RPD;
+  return new THREE.Vector3( r * Math.cos( radians ), r * Math.sin( radians ), 0 );
+} 
+
 
 function WIPModel( outRadius )
 {
-  var RPD = Math.PI / 180;
-  var inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
-  var DiHedralAngle = 120; ////// FIXME a guess
+  var inRadius = outRadius * Math.sin( 54 * RPD ) ;
+////  var DHA = 90 + Math.asin( ( outRadius / inRadius ) * Math.sin(36 * RPD) ) / RPD;
+///  var DHA = 120; ////// FIXME a guess
+  var DHA = 2 * Math.asin( Math.cos(36 * RPD) / Math.sin( 72 * RPD ) ) / RPD;
+  console.log( DHA );
 
   var geometry = new ngonGeometry( 5, outRadius );
-  var material = new THREE.MeshLambertMaterial(
-      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: 0x999900 }
+  var redMaterial = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       );
-  var mesh = new THREE.Mesh( geometry, material );
-  var mesh1 = mesh.clone();
+  var blueMaterial = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "blue"}
+      );
+  var redMesh = new THREE.Mesh( geometry, redMaterial );
+  var blueMesh = new THREE.Mesh( geometry, blueMaterial );
+
+  redMesh.rotation = new THREE.Euler( 0, 0, -18 * RPD, 'XYZ' );
+
+  redMesh.position = new THREE.Vector3( 0, -inRadius, 0 );
+
+  var theta = (180 - DHA) * RPD;
+  var phi = (DHA - 90) * RPD ;
+  var psi = (0) * RPD ;
+
+  blueMesh.rotation = new THREE.Euler( theta, 0, +18 * RPD, 'XYZ' );
+
+  blueMesh.position = new THREE.Vector3(  0,
+          inRadius * Math.sin( phi ),
+          inRadius * Math.cos( phi )) ;
 
 
-  var x_axis = new THREE.Vector3(1,0,0);
-  var y_axis = new THREE.Vector3(0,1,0);
-  var z_axis = new THREE.Vector3(0,0,1);
+                                            
+  /***********
+  blueMesh.position = new THREE.Vector3(  0,
+                                          -inRadius * Math.sin( theta * RPD ),
+                                          inRadius * Math.cos( theta * RPD ) );
 
-  var e_axis = new THREE.Vector3( Math.cos( 18 * RPD), Math.sin( (108 - 90 ) * RPD), 0 );  
+                                          ***************/
+  /***************
+    polarVec is not the right concept here.
+    For red we want Y axis
+    For blue we want Y rotated around x.
+      so 0, sin t, cos t
+      *****************/
 
-  mesh1.rotation.z = 36 * RPD;
-  obj1 = new THREE.Object3D();
-  obj1.add(mesh1);
 
-  mesh1.rotateOnAxis( e_axis, (20) * RPD );
-  //mesh1.rotateOnAxis( e_axis, (180 - 148) * RPD );
 
-//  var DHA = 148 * Math.PI / 180 ; 
-//  mesh1.rotateOnAxis( x_axis, DHA );
-//  mesh1.rotateOnAxis( z_axis, DHA );
 
-  var gap = 5;
-  //obj1.position.x = -gap + 2 * inRadius * Math.cos( 1.5 * 72 * RPD );
-  //obj1.position.y = gap + 2 * inRadius * Math.sin( 1.5 * 72 * RPD );
-  obj = new THREE.Object3D();
- // obj.add( mesh );
-  obj.add( obj1 );
+  var obj = new THREE.Object3D();
+  obj.add( redMesh );
+  obj.add( blueMesh );
   return obj;
 }
 
