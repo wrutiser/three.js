@@ -64,9 +64,12 @@ function init()
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
 	// LIGHT
-	var light = new THREE.PointLight(0xffffff);
-	light.position.set(100,250,100);
-	scene.add(light);
+	var light1 = new THREE.PointLight(0xffffff);
+	light1.position.set(100,250,100);
+	scene.add(light1);
+	var light2 = new THREE.PointLight(0xffffff);
+	light2.position.set(.100,-250,100);
+	scene.add(light2);
   var amblight = new THREE.AmbientLight( 0x444444 );
   scene.add(amblight);
   
@@ -192,6 +195,7 @@ function WIPModel( outRadius )
 {
   var inRadius = outRadius * Math.sin( 54 * RPD ) ;
   var DHA = 2 * Math.asin( Math.cos(36 * RPD) / Math.sin( 72 * RPD ) ) / RPD;
+  var EDGE = outRadius * 2 * Math.sin( 36 * RPD ) ;
 
   var geometry = new ngonGeometry( 5, outRadius );
   var redMaterial = new THREE.MeshLambertMaterial(
@@ -200,25 +204,35 @@ function WIPModel( outRadius )
   var blueMaterial = new THREE.MeshLambertMaterial(
       { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "blue"}
       );
+  var greenMaterial = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "green"}
+      );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
   var blueMesh = new THREE.Mesh( geometry, blueMaterial );
+  var greenMesh = new THREE.Mesh( geometry, greenMaterial );
 
-  var theta = (90 - DHA / 2) * RPD ;
+  var theta = (90 - DHA / 2) * RPD ; // approximately 31.7 degrees
   redMesh.rotation = new THREE.Euler( -theta, 0, -18 * RPD, 'XYZ' );
-
   redMesh.position = new THREE.Vector3( 0,
           inRadius * -Math.cos( theta ),
           inRadius * Math.sin( theta ) );
 
   blueMesh.rotation = new THREE.Euler(  theta, 0, +18 * RPD, 'XYZ' );
-
   blueMesh.position = new THREE.Vector3( 0,
           inRadius * Math.cos( theta ),
           inRadius * Math.sin( theta )) ;
 
+  var phi = Math.acos( (Math.cos( 36 * RPD ) - 0.5) / Math.sin( 36 * RPD ) ); // approximately 58.3 degrees
+
+  greenMesh.rotation = new THREE.Euler(  0, phi, 0, 'XYZ' );
+  greenMesh.position = new THREE.Vector3( -outRadius * Math.cos( phi ) - EDGE / 2,
+          0,
+        outRadius * Math.sin( phi )) ;
+
   var obj = new THREE.Object3D();
   obj.add( redMesh );
   obj.add( blueMesh );
+  obj.add( greenMesh );
 
   return obj;
 }
