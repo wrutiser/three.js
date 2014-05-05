@@ -191,10 +191,7 @@ function polarVec( r, degrees )
 function WIPModel( outRadius )
 {
   var inRadius = outRadius * Math.sin( 54 * RPD ) ;
-////  var DHA = 90 + Math.asin( ( outRadius / inRadius ) * Math.sin(36 * RPD) ) / RPD;
-///  var DHA = 120; ////// FIXME a guess
   var DHA = 2 * Math.asin( Math.cos(36 * RPD) / Math.sin( 72 * RPD ) ) / RPD;
-  console.log( DHA );
 
   var geometry = new ngonGeometry( 5, outRadius );
   var redMaterial = new THREE.MeshLambertMaterial(
@@ -206,41 +203,23 @@ function WIPModel( outRadius )
   var redMesh = new THREE.Mesh( geometry, redMaterial );
   var blueMesh = new THREE.Mesh( geometry, blueMaterial );
 
-  redMesh.rotation = new THREE.Euler( 0, 0, -18 * RPD, 'XYZ' );
+  var theta = (90 - DHA / 2) * RPD ;
+  redMesh.rotation = new THREE.Euler( -theta, 0, -18 * RPD, 'XYZ' );
 
-  redMesh.position = new THREE.Vector3( 0, -inRadius, 0 );
+  redMesh.position = new THREE.Vector3( 0,
+          inRadius * -Math.cos( theta ),
+          inRadius * Math.sin( theta ) );
 
-  var theta = (180 - DHA) * RPD;
-  var phi = (DHA - 90) * RPD ;
-  var psi = (0) * RPD ;
+  blueMesh.rotation = new THREE.Euler(  theta, 0, +18 * RPD, 'XYZ' );
 
-  blueMesh.rotation = new THREE.Euler( theta, 0, +18 * RPD, 'XYZ' );
-
-  blueMesh.position = new THREE.Vector3(  0,
-          inRadius * Math.sin( phi ),
-          inRadius * Math.cos( phi )) ;
-
-
-                                            
-  /***********
-  blueMesh.position = new THREE.Vector3(  0,
-                                          -inRadius * Math.sin( theta * RPD ),
-                                          inRadius * Math.cos( theta * RPD ) );
-
-                                          ***************/
-  /***************
-    polarVec is not the right concept here.
-    For red we want Y axis
-    For blue we want Y rotated around x.
-      so 0, sin t, cos t
-      *****************/
-
-
-
+  blueMesh.position = new THREE.Vector3( 0,
+          inRadius * Math.cos( theta ),
+          inRadius * Math.sin( theta )) ;
 
   var obj = new THREE.Object3D();
   obj.add( redMesh );
   obj.add( blueMesh );
+
   return obj;
 }
 
