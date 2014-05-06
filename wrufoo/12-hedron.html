@@ -207,11 +207,17 @@ function WIPModel( outRadius )
   var greenMaterial = new THREE.MeshLambertMaterial(
       { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "green"}
       );
+  var yellowMaterial = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "yellow"}
+      );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
   var blueMesh = new THREE.Mesh( geometry, blueMaterial );
   var greenMesh = new THREE.Mesh( geometry, greenMaterial );
+  var yellowMesh = new THREE.Mesh( geometry, yellowMaterial );
 
   var theta = (90 - DHA / 2) * RPD ; // approximately 31.7 degrees
+  var phi = Math.acos( (Math.cos( 36 * RPD ) - 0.5) / Math.sin( 36 * RPD ) ); // approximately 58.3 degrees
+
   redMesh.rotation = new THREE.Euler( -theta, 0, -18 * RPD, 'XYZ' );
   redMesh.position = new THREE.Vector3( 0,
           inRadius * -Math.cos( theta ),
@@ -222,10 +228,13 @@ function WIPModel( outRadius )
           inRadius * Math.cos( theta ),
           inRadius * Math.sin( theta )) ;
 
-  var phi = Math.acos( (Math.cos( 36 * RPD ) - 0.5) / Math.sin( 36 * RPD ) ); // approximately 58.3 degrees
-
   greenMesh.rotation = new THREE.Euler(  0, phi, 0, 'XYZ' );
   greenMesh.position = new THREE.Vector3( -outRadius * Math.cos( phi ) - EDGE / 2,
+          0,
+        outRadius * Math.sin( phi )) ;
+
+  yellowMesh.rotation = new THREE.Euler(  0, -phi, 36 * RPD, 'XYZ' );
+  yellowMesh.position = new THREE.Vector3( outRadius * Math.cos( phi ) + EDGE / 2,
           0,
         outRadius * Math.sin( phi )) ;
 
@@ -233,7 +242,28 @@ function WIPModel( outRadius )
   obj.add( redMesh );
   obj.add( blueMesh );
   obj.add( greenMesh );
+  obj.add( yellowMesh );
 
+  /*********************** EXPERIMENT *********/
+
+  obja = obj.clone() ;
+  objb = obj.clone() ;
+
+  obja.position = new THREE.Vector3( 0 * outRadius, 0, 3 * outRadius) ;
+  obja.rotation = new THREE.Euler( 0, -180 * RPD, 0 , 'XYZ' );
+
+  objb.position = new THREE.Vector3( 0, +1.5 * outRadius,1.5 * outRadius) ;
+  objb.rotation = new THREE.Euler( 90 * RPD, 0 * RPD, 90 * RPD, 'XYZ' );
+
+
+  objx = new THREE.Object3D();
+
+  objx.add( obj );
+  objx.add( obja );
+  objx.add( objb );
+  return objx;
+  
+  /*********************** END EXPERIMENT *********/
   return obj;
 }
 
