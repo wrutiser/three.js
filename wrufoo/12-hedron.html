@@ -116,7 +116,7 @@ function init()
           .name( "Visible?" );
 
   var modelselector = gui.add( gui_parameters, 'model',
-                [ "None", "ButterFly", "WIP" ] )
+                [ "None", "ButterFly", "WIP", "Reducks" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -140,6 +140,8 @@ function init()
     
     if( value == "None" ){
         mesh = new THREE.Mesh( );
+    } else if( value == "Reducks" ) {
+        mesh = ReducksModel( 100 );
     } else if( value == "WIP" ) {
         mesh = WIPModel( 50 );
     } else if( value == "ButterFly" ) {
@@ -156,7 +158,7 @@ function init()
 	// CUSTOM //
 	////////////
 	
-  changeModel( "WIP" ); // FIXME -- temp for WIP
+  changeModel( "Reducks" ); // FIXME -- temp for WIP
 }
 
 function animate() 
@@ -190,6 +192,81 @@ function polarVec( r, degrees )
   return new THREE.Vector3( r * Math.cos( radians ), r * Math.sin( radians ), 0 );
 } 
 
+
+function ReducksModel( fvRadius )
+{
+  // fvRadius is the radius of a face's vertices.
+  // feRadius is the radius of the centers of the edges of a face.
+  // svRadius is the radius of the solid's vertices.
+  // sfRadius is the radius of the centers of the solid's edges.
+
+  var halfEdge = fvRadius * Math.sin( 36 * RPD );
+  var feRadius = fvRadius * Math.cos( 36 * RPD );
+  var diagRadius = fvRadius * Math.sin( 18 * RPD );
+  var halfDiagLength = fvRadius * Math.cos( 18 * RPD );
+  var halfDihedralAngle = Math.asin( halfDiagLength / (diagRadius + feRadius) );
+  var svRadius = feRadius / Math.cos( halfDihedralAngle );
+  var sfRadius = feRadius * Math.tan( halfDihedralAngle );
+
+  console.log( "halfEdge " + halfEdge );
+  console.log( "feRadius " + feRadius );
+  console.log( "diagRadius " + diagRadius );
+  console.log( "halfDiagLength " + halfDiagLength );
+  console.log( "svRadius " + svRadius );
+  console.log( "sfRadius " + sfRadius );
+  console.log( "halfDihedralAngle " + halfDihedralAngle / RPD );
+
+
+  var geometry = new ngonGeometry( 5, fvRadius );
+  geometry.computeFaceNormals();
+  geometry.computeVertexNormals();
+
+  var redMaterial = new THREE.MeshLambertMaterial(
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+      );
+  var redMesh = new THREE.Mesh( geometry, redMaterial );
+  var tilt = -(2 * halfDihedralAngle/RPD - 90)* RPD;
+  redMesh.position = new THREE.Vector3( Math.cos(tilt) * sfRadius,
+      Math.sin(tilt) * sfRadius, 0 );
+  redMesh.rotation = new THREE.Euler(
+      -18 * RPD,
+      -90 * RPD,
+      tilt,
+      'ZXY' );
+
+  var obj0 = new THREE.Object3D();
+  obj0.add( redMesh );
+  obj1 = obj0.clone();
+  obj1.rotation = new THREE.Euler( 0, 1 * 72 * RPD, 0,'XYZ');
+  obj2 = obj0.clone();
+  obj2.rotation = new THREE.Euler( 0, 2 * 72 * RPD, 0,'XYZ');
+  obj3 = obj0.clone();
+  obj3.rotation = new THREE.Euler( 0, 3 * 72 * RPD, 0,'XYZ');
+  obj4 = obj0.clone();
+  obj4.rotation = new THREE.Euler( 0, 4 * 72 * RPD, 0,'XYZ');
+
+  obj5 = obj0.clone();  // bottom
+  obj5.rotation = new THREE.Euler( 0, 0.5 * 72 * RPD,
+        -2 * (90 - halfDihedralAngle/RPD) * RPD,
+       'XYZ');
+
+  var bowlObjs = new THREE.Object3D();
+  bowlObjs.add(obj0);
+  bowlObjs.add(obj1);
+  bowlObjs.add(obj2);
+  bowlObjs.add(obj3);
+  bowlObjs.add(obj4);
+  bowlObjs.add(obj5);
+
+  var topBowl = bowlObjs.clone();
+  topBowl.rotation = new THREE.Euler( 0, 0, 180 * RPD );
+
+  var thing = new THREE.Object3D();
+  thing.add( bowlObjs );
+  thing.add( topBowl );
+
+  return thing;
+}
 
 function WIPModel( outRadius )
 {
