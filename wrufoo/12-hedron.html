@@ -97,25 +97,28 @@ function init()
     floorpnumber2: 1,
     floorvisible: true,
     recolorfloor: function(){ paintfloor(); },
-    model: "Flag"                  
+    model: "Flag",
+    autoRotate: false,
+    autoRotateSpeed: 3,
   }
 
   var floorFolder = gui.addFolder( 'Floor' );
 
-  var floorColor1 = floorFolder.addColor( gui_parameters, 'floorcolor1' )
-          .name( "Color 1" );
-  var floorColor2 = floorFolder.addColor( gui_parameters, 'floorcolor2' ) 
-          .name( "Color 2" );
+  floorFolder.addColor( gui_parameters, 'floorcolor1' ).name( "Color 1" );
+  floorFolder.addColor( gui_parameters, 'floorcolor2' ).name( "Color 2" );
   floorFolder.add( gui_parameters, 'recolorfloor' ).name( "Paint Floor" );
 
-  var floorNumber1 = floorFolder.add( gui_parameters, 'floorpnumber1' )
-          .name( "Number 1" );
-  var floorNumber2 = floorFolder.add( gui_parameters, 'floorpnumber2' )
-          .name( "Number 2" );
-  var floorVisible = floorFolder.add( gui_parameters, 'floorvisible' )
-          .name( "Visible?" );
+  floorFolder.add( gui_parameters, 'floorpnumber1' ).name( "Number 1" );
+  floorFolder.add( gui_parameters, 'floorpnumber2' ).name( "Number 2" );
+  floorFolder.add( gui_parameters, 'floorvisible' ).name( "Visible?" );
 
-  var modelselector = gui.add( gui_parameters, 'model',
+  var autoRotateFolder = gui.addFolder( 'AutoRotate' );
+  autoRotateFolder.add( gui_parameters, 'autoRotate' ).name( "Active" )
+          .onChange( function(value) { controls.autoRotate = value; } );
+  autoRotateFolder.add( gui_parameters, 'autoRotateSpeed', 0, 10).name("Speed")
+          .onChange( function(value) {  controls.autoRotateSpeed = value; } );
+
+  gui.add( gui_parameters, 'model',
                 [ "None", "ButterFly", "WIP", "Reducks" ] )
           .onChange( function(value) { changeModel( value ) } );
 
@@ -136,6 +139,7 @@ function init()
 
   function changeModel( value ) 
   {
+    console.log( "changeModel( " + value + ")" );
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
     
     if( value == "None" ){
@@ -151,7 +155,6 @@ function init()
     }
     scene.add( mesh );
     mesh.name = "HeDrOn";
-
   }
 
 	////////////
@@ -176,7 +179,7 @@ function update()
 		// do something
 	}
 	************************/
-//////////////////////	controls.update();
+	controls.update();
 	camera.up = new THREE.Vector3(0,1,0);
 	//////////////////stats.update();
 }
