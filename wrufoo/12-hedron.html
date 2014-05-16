@@ -21,6 +21,36 @@
 <div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
 
 <script>
+'use strict'
+
+/**************************************************
+  FOUR LIGHTS 
+  This will ventually be a seperate file.
+**************************************************/
+var fourLights;
+
+function FourLights()
+{
+  var obj = new THREE.Object3D();
+  var light111 = new THREE.PointLight(0xffffff);
+	light111.position.set(100,100,100);
+  light111.name = 'light111';
+  obj.add(light111);
+
+  var light110 = new THREE.PointLight(0xffffff);
+	light110.position.set(100,100,-100);
+  light110.name = 'light110';
+  obj.add(light110);
+
+  var light011 = new THREE.PointLight(0xffffff);
+	light011.position.set(-100,100,100);
+  light011.name = 'light011';
+  obj.add(light011);
+
+  obj.name = 'FourLights';
+  return obj;
+}
+
 /*
 This is based on template.html which is derived from:
 	Three.js "tutorials by example"
@@ -64,6 +94,14 @@ function init()
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
 	// LIGHT
+  var lights = FourLights();
+  console.log( "lights: " + lights);
+  console.log( lights.name );
+  console.log( lights );
+  
+  scene.add( lights );
+
+  /************************* hide for FourLights devel
 	var light1 = new THREE.PointLight(0xffffff);
 	light1.position.set(100,250,100);
 	scene.add(light1);
@@ -72,7 +110,8 @@ function init()
 	scene.add(light2);
   var amblight = new THREE.AmbientLight( 0x444444 );
   scene.add(amblight);
-  
+  ******************************/
+
   var color1 = new THREE.Color( 0x777777 ) ;
   var color2 = new THREE.Color( 0xeeeeee ) ;
   scene.add( makeFloor( color1, color2, 1, 1 ));
@@ -89,7 +128,7 @@ function init()
 	////////////
 
   var gui = new dat.GUI();
-  gui_parameters =
+  var gui_parameters =
   {
     floorcolor1:  "#777777",
     floorcolor2:  "#eeeeee",
@@ -126,9 +165,9 @@ function init()
 
   function paintfloor()
   {
-    color1x = parseInt( gui_parameters.floorcolor1.replace("#","0x") );
+    var color1x = parseInt( gui_parameters.floorcolor1.replace("#","0x") );
     var color1 = new THREE.Color( color1x );
-    color2x = parseInt( gui_parameters.floorcolor2.replace("#","0x") );
+    var color2x = parseInt( gui_parameters.floorcolor2.replace("#","0x") );
     var color2 = new THREE.Color( color2x );
     var newfloor = makeFloor( color1, color2,
           gui_parameters.floorpnumber1, gui_parameters.floorpnumber2 ) ;
@@ -239,16 +278,16 @@ function ReducksModel( fvRadius )
 
   var obj0 = new THREE.Object3D();
   obj0.add( redMesh );
-  obj1 = obj0.clone();
+  var obj1 = obj0.clone();
   obj1.rotation = new THREE.Euler( 0, 1 * 72 * RPD, 0,'XYZ');
-  obj2 = obj0.clone();
+  var obj2 = obj0.clone();
   obj2.rotation = new THREE.Euler( 0, 2 * 72 * RPD, 0,'XYZ');
-  obj3 = obj0.clone();
+  var obj3 = obj0.clone();
   obj3.rotation = new THREE.Euler( 0, 3 * 72 * RPD, 0,'XYZ');
-  obj4 = obj0.clone();
+  var obj4 = obj0.clone();
   obj4.rotation = new THREE.Euler( 0, 4 * 72 * RPD, 0,'XYZ');
 
-  obj5 = obj0.clone();  // bottom
+  var obj5 = obj0.clone();  // bottom
   obj5.rotation = new THREE.Euler( 0, 0.5 * 72 * RPD,
         -2 * (90 - halfDihedralAngle/RPD) * RPD,
        'XYZ');
@@ -326,8 +365,8 @@ function WIPModel( outRadius )
 
   /*********************** EXPERIMENT *********/
 
-  obja = obj.clone() ;
-  objb = obj.clone() ;
+  var obja = obj.clone() ;
+  var objb = obj.clone() ;
 
   obja.position = new THREE.Vector3( 0 * outRadius, 0, 3 * outRadius) ;
   obja.rotation = new THREE.Euler( 0, -180 * RPD, 0 , 'XYZ' );
@@ -336,7 +375,7 @@ function WIPModel( outRadius )
   objb.rotation = new THREE.Euler( 90 * RPD, 0 * RPD, 90 * RPD, 'XYZ' );
 
 
-  objx = new THREE.Object3D();
+  var objx = new THREE.Object3D();
 
   objx.add( obj );
   objx.add( obja );
@@ -383,8 +422,8 @@ function butterFlyModel0( outRadius )
 function butterFlyModel( outRadius )
 {
   var RPD  = Math.PI / 180;
-  inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
-  dihedralAngle = 115 * RPD ;
+  var inRadius = outRadius * Math.sin( 54 * Math.PI / 180 ) ;
+  var dihedralAngle = 115 * RPD ;
   var y_axis = new THREE.Vector3(0,1,0);
   var z_axis = new THREE.Vector3(0,0,1);
 
@@ -465,7 +504,7 @@ function makeFloor( color1, color2, num1, num2 )
     var i = 0;
     while( i + num1 + num2 <= floorGeometry.faces.length ){
       for( var j = 0; j < num1; j += 1 ){
-        face  = floorGeometry.faces[ i ];	
+        var face  = floorGeometry.faces[ i ];	
         face.color.set(color1);		
         i += 1;
       }
