@@ -22,32 +22,49 @@
 
 <script>
 'use strict'
-
+// GLOBAL NEXUS
+var wruHub = {};
 /**************************************************
   FOUR LIGHTS 
   This will ventually be a seperate file.
 **************************************************/
-var fourLights;
 
 function FourLights()
 {
   var obj = new THREE.Object3D();
   var light111 = new THREE.PointLight(0xffffff);
-	light111.position.set(100,100,100);
+	light111.position.set(1000,1000,1000);
   light111.name = 'light111';
   obj.add(light111);
 
+  wruHub.gui.add( light111, 'intensity', 0.0, 5.0).name('Intensity') ;
+
   var light110 = new THREE.PointLight(0xffffff);
-	light110.position.set(100,100,-100);
+	light110.position.set(1000,1000,-1000);
   light110.name = 'light110';
   obj.add(light110);
 
+  wruHub.gui.add( light110, 'intensity', 0.0, 5.0).name('Intensity') ;
+
   var light011 = new THREE.PointLight(0xffffff);
-	light011.position.set(-100,100,100);
+	light011.position.set(-1000,1000,1000);
   light011.name = 'light011';
   obj.add(light011);
 
+  wruHub.gui.add( light011, 'intensity', 0.0, 5.0).name('Intensity') ;
+
+  var light010 = new THREE.PointLight(0xffffff);
+	light010.position.set(-1000,1000,-1000);
+  light010.name = 'light010';
+  obj.add(light010);
+
+  wruHub.gui.add( light010, 'intensity', 0.0, 5.0).name('Intensity') ;
+
   obj.name = 'FourLights';
+  wruHub.fourLights = obj;
+
+  
+
   return obj;
 }
 
@@ -63,6 +80,7 @@ Unneed code has been removed. Restore as needed.
 // MAIN
 
 // standard global variables
+// FIXME move to wruHub as needed.
 var container, scene, camera, renderer, controls, stats;
 var RPD = Math.PI / 180;
 
@@ -75,8 +93,10 @@ animate();
 // FUNCTIONS 		
 function init() 
 {
+  wruHub.gui = new dat.GUI();
+
 	// SCENE
-	scene = new THREE.Scene();
+  wruHub.scene = scene = new THREE.Scene(); // FIXME -- use wruHub.scene everywhere
 	// CAMERA
 	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
@@ -100,6 +120,8 @@ function init()
   console.log( lights );
   
   scene.add( lights );
+  wruHub.fourLights = lights;
+
 
   /************************* hide for FourLights devel
 	var light1 = new THREE.PointLight(0xffffff);
@@ -121,13 +143,14 @@ function init()
 	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
 	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-	scene.add(skyBox);
+////	scene.add(skyBox);
 	
 	////////////
 	//  GUI   //
 	////////////
 
-  var gui = new dat.GUI();
+  var gui = wruHub.gui;//FIXME
+
   var gui_parameters =
   {
     floorcolor1:  "#777777",
@@ -158,7 +181,7 @@ function init()
           .onChange( function(value) {  controls.autoRotateSpeed = value; } );
 
   gui.add( gui_parameters, 'model',
-                [ "None", "ButterFly", "WIP", "Reducks" ] )
+                [ "None", "Box", "Pentagon", "ButterFly", "WIP", "Reducks" ] )
           .onChange( function(value) { changeModel( value ) } );
 
 
@@ -178,13 +201,18 @@ function init()
 
   function changeModel( value ) 
   {
+    console.log( "gui_parameters is " + gui_parameters.model );
     console.log( "changeModel( " + value + ")" );
     scene.remove( scene.getObjectByName( "HeDrOn", false ) );
     
     if( value == "None" ){
         mesh = new THREE.Mesh( );
+    } else if( value == "Box" ) {
+        mesh = boxModel( 50, 50, 50 );
+    } else if( value == "Pentagon" ) {
+        mesh = ngonModel( 5, 25 );
     } else if( value == "Reducks" ) {
-        mesh = ReducksModel( 100 );
+        mesh = ReducksModel( 25 );
     } else if( value == "WIP" ) {
         mesh = WIPModel( 50 );
     } else if( value == "ButterFly" ) {
@@ -264,17 +292,25 @@ function ReducksModel( fvRadius )
   geometry.computeVertexNormals();
 
   var redMaterial = new THREE.MeshLambertMaterial(
-      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+//      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+      { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
   var tilt = -(2 * halfDihedralAngle/RPD - 90)* RPD;
+  console.log( "tilt " + tilt / RPD ) ;
   redMesh.position = new THREE.Vector3( Math.cos(tilt) * sfRadius,
       Math.sin(tilt) * sfRadius, 0 );
+  console.log( "redMesh.position " + redMesh.position );
+  console.log( redMesh.position ) ;
   redMesh.rotation = new THREE.Euler(
-      -18 * RPD,
-      -90 * RPD,
+      +18 * RPD,
+//      -18 * RPD,
+      +90 * RPD,
+//      -90 * RPD,
       tilt,
       'ZXY' );
+  console.log( "redMesh.rotation " + redMesh.rotation );
+  console.log( redMesh.rotation ) ;
 
   var obj0 = new THREE.Object3D();
   obj0.add( redMesh );
@@ -294,12 +330,13 @@ function ReducksModel( fvRadius )
 
   var bowlObjs = new THREE.Object3D();
   bowlObjs.add(obj0);
+  /******************************
   bowlObjs.add(obj1);
   bowlObjs.add(obj2);
   bowlObjs.add(obj3);
   bowlObjs.add(obj4);
   bowlObjs.add(obj5);
-
+********************************/
   var topBowl = bowlObjs.clone();
   topBowl.rotation = new THREE.Euler( 0, 0, 180 * RPD );
 
@@ -496,6 +533,17 @@ function ngonModel( n, radius )
 
 
 // Floor
+
+function boxModel() 
+{
+    var geometry = new THREE.BoxGeometry( 50, 50, 50 );
+    var material = new THREE.MeshLambertMaterial(
+        { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.position.set(0,0,0);
+    scene.add(mesh);
+    return mesh;
+}
 
 function makeFloor( color1, color2, num1, num2 )
 {
