@@ -63,8 +63,6 @@ function FourLights()
   obj.name = 'FourLights';
   wruHub.fourLights = obj;
 
-  
-
   return obj;
 }
 
@@ -292,8 +290,8 @@ function ReducksModel( fvRadius )
   geometry.computeVertexNormals();
 
   var redMaterial = new THREE.MeshLambertMaterial(
-//      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
-      { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+//      { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
   var tilt = -(2 * halfDihedralAngle/RPD - 90)* RPD;
@@ -303,10 +301,10 @@ function ReducksModel( fvRadius )
   console.log( "redMesh.position " + redMesh.position );
   console.log( redMesh.position ) ;
   redMesh.rotation = new THREE.Euler(
-      +18 * RPD,
-//      -18 * RPD,
-      +90 * RPD,
-//      -90 * RPD,
+//      +18 * RPD,
+      -18 * RPD,
+//      +90 * RPD,
+      -90 * RPD,
       tilt,
       'ZXY' );
   console.log( "redMesh.rotation " + redMesh.rotation );
@@ -330,13 +328,14 @@ function ReducksModel( fvRadius )
 
   var bowlObjs = new THREE.Object3D();
   bowlObjs.add(obj0);
-  /******************************
+  /******************************////
   bowlObjs.add(obj1);
   bowlObjs.add(obj2);
   bowlObjs.add(obj3);
   bowlObjs.add(obj4);
   bowlObjs.add(obj5);
-********************************/
+
+/********************************/
   var topBowl = bowlObjs.clone();
   topBowl.rotation = new THREE.Euler( 0, 0, 180 * RPD );
 
