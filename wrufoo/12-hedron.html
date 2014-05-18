@@ -134,9 +134,21 @@ function init()
 
   var color1 = new THREE.Color( 0x777777 ) ;
   var color2 = new THREE.Color( 0xeeeeee ) ;
-  scene.add( makeFloor( color1, color2, 1, 1 ));
-  scene.add( new THREE.AxisHelper(100) );
-
+//  scene.add( makeFloor( color1, color2, 1, 1 ));  FIXME */
+//  scene.add( new THREE.AxisHelper(100) );
+// ( dir, origin, length, color, headLength, headWidth ) {
+  scene.add( new THREE.ArrowHelper(
+      new THREE.Vector3( 1, 0, 0),
+      new THREE.Vector3( 0, 0, 0),
+      500, 0xff0000 ));
+  scene.add( new THREE.ArrowHelper(
+      new THREE.Vector3( 0, 1, 0),
+      new THREE.Vector3( 0, 0, 0),
+      500, 0x00ff00 ));
+  scene.add( new THREE.ArrowHelper(
+      new THREE.Vector3( 0, 0, 1),
+      new THREE.Vector3( 0, 0, 0),
+      500, 0x0000ff ));
 	// SKYBOX
 	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
