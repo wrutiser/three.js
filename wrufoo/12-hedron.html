@@ -37,28 +37,28 @@ function FourLights()
   light111.name = 'light111';
   obj.add(light111);
 
-  wruHub.gui.add( light111, 'intensity', 0.0, 5.0).name('Intensity') ;
+  wruHub.gui.add( light111, 'intensity', 0.0, 5.0).name('Intensity+++') ;
 
   var light110 = new THREE.PointLight(0xffffff);
 	light110.position.set(1000,1000,-1000);
   light110.name = 'light110';
   obj.add(light110);
 
-  wruHub.gui.add( light110, 'intensity', 0.0, 5.0).name('Intensity') ;
+  wruHub.gui.add( light110, 'intensity', 0.0, 5.0).name('Intensity++-') ;
 
   var light011 = new THREE.PointLight(0xffffff);
 	light011.position.set(-1000,1000,1000);
   light011.name = 'light011';
   obj.add(light011);
 
-  wruHub.gui.add( light011, 'intensity', 0.0, 5.0).name('Intensity') ;
+  wruHub.gui.add( light011, 'intensity', 0.0, 5.0).name('Intensity-++') ;
 
   var light010 = new THREE.PointLight(0xffffff);
 	light010.position.set(-1000,1000,-1000);
   light010.name = 'light010';
   obj.add(light010);
 
-  wruHub.gui.add( light010, 'intensity', 0.0, 5.0).name('Intensity') ;
+  wruHub.gui.add( light010, 'intensity', 0.0, 5.0).name('Intensity-+-') ;
 
   obj.name = 'FourLights';
   wruHub.fourLights = obj;
@@ -287,6 +287,7 @@ function ReducksModel( fvRadius )
   var halfDihedralAngle = Math.asin( halfDiagLength / (diagRadius + feRadius) );
   var svRadius = feRadius / Math.cos( halfDihedralAngle );
   var sfRadius = feRadius * Math.tan( halfDihedralAngle );
+  var tilt = -(2 * halfDihedralAngle/RPD - 90)* RPD;
 
   console.log( "halfEdge " + halfEdge );
   console.log( "feRadius " + feRadius );
@@ -295,62 +296,79 @@ function ReducksModel( fvRadius )
   console.log( "svRadius " + svRadius );
   console.log( "sfRadius " + sfRadius );
   console.log( "halfDihedralAngle " + halfDihedralAngle / RPD );
-
+  console.log( "tilt " + tilt / RPD ) ;
 
   var geometry = new ngonGeometry( 5, fvRadius );
-  geometry.computeFaceNormals();
-  geometry.computeVertexNormals();
+//  geometry.computeFaceNormals();
+//  geometry.computeVertexNormals();
 
   var redMaterial = new THREE.MeshLambertMaterial(
-      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
-//      { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+//      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+      { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
+//      { side: THREE.BackSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
-  var tilt = -(2 * halfDihedralAngle/RPD - 90)* RPD;
-  console.log( "tilt " + tilt / RPD ) ;
-  redMesh.position = new THREE.Vector3( Math.cos(tilt) * sfRadius,
+
+  var coneMesh = new THREE.Mesh(
+                              // radius top, radius bottom, height
+         new THREE.CylinderGeometry( 0.1 * fvRadius, 0.0, 1.5 * fvRadius ),
+         new THREE.MeshBasicMaterial( { color: "white" } )
+     );
+  coneMesh.rotation = new THREE.Euler( -90 * RPD, 0, 0 );
+//  coneMesh.rotation = new THREE.Euler( 90 * RPD, 0, 0 );
+
+  var protoFace = new THREE.Object3D();
+  protoFace.add( redMesh );
+  protoFace.add( coneMesh );
+
+  protoFace.position = new THREE.Vector3( Math.cos(tilt) * sfRadius,
       Math.sin(tilt) * sfRadius, 0 );
-  console.log( "redMesh.position " + redMesh.position );
-  console.log( redMesh.position ) ;
-  redMesh.rotation = new THREE.Euler(
-//      +18 * RPD,
-      -18 * RPD,
-//      +90 * RPD,
-      -90 * RPD,
+  console.log( "protoFace.position " + protoFace.position );
+  console.log( protoFace.position ) ;
+  protoFace.rotation = new THREE.Euler(
+      +18 * RPD,
+//      -18 * RPD,
+      +90 * RPD,
+//      -90 * RPD,
       tilt,
       'ZXY' );
-  console.log( "redMesh.rotation " + redMesh.rotation );
-  console.log( redMesh.rotation ) ;
+  console.log( "protoFace.rotation " + protoFace.rotation );
+  console.log( protoFace.rotation ) ;
 
+  var bowlObjs = new THREE.Object3D();
+  
   var obj0 = new THREE.Object3D();
-  obj0.add( redMesh );
+  obj0.add( protoFace );
+  bowlObjs.add(obj0);
+
+  /*******************************************************************/
   var obj1 = obj0.clone();
   obj1.rotation = new THREE.Euler( 0, 1 * 72 * RPD, 0,'XYZ');
+  bowlObjs.add(obj1);
+
   var obj2 = obj0.clone();
   obj2.rotation = new THREE.Euler( 0, 2 * 72 * RPD, 0,'XYZ');
+  bowlObjs.add(obj2);
+
   var obj3 = obj0.clone();
   obj3.rotation = new THREE.Euler( 0, 3 * 72 * RPD, 0,'XYZ');
+  bowlObjs.add(obj3);
+
   var obj4 = obj0.clone();
   obj4.rotation = new THREE.Euler( 0, 4 * 72 * RPD, 0,'XYZ');
+  bowlObjs.add(obj4);
 
   var obj5 = obj0.clone();  // bottom
   obj5.rotation = new THREE.Euler( 0, 0.5 * 72 * RPD,
         -2 * (90 - halfDihedralAngle/RPD) * RPD,
        'XYZ');
-
-  var bowlObjs = new THREE.Object3D();
-  bowlObjs.add(obj0);
-  /******************************////
-  bowlObjs.add(obj1);
-  bowlObjs.add(obj2);
-  bowlObjs.add(obj3);
-  bowlObjs.add(obj4);
   bowlObjs.add(obj5);
 
-/********************************/
+
+
   var topBowl = bowlObjs.clone();
   topBowl.rotation = new THREE.Euler( 0, 0, 180 * RPD );
-
+/**************************************************************/
   var thing = new THREE.Object3D();
   thing.add( bowlObjs );
   thing.add( topBowl );
@@ -511,7 +529,7 @@ function ngonGeometry( n, radius )
   var normal = new THREE.Vector3( 0, 0, 1 );
   for( var i = 1; i < n; i += 1 )
   {
-    geometry.faces.push( new THREE.Face3( 0, i, i + 1, normal ) );
+    geometry.faces.push( new THREE.Face3( 0, i, i + 1, normal.clone() ) );
   }
   geometry.faces.push( new THREE.Face3( 0, n, 1, normal ) );
   geometry.computeBoundingSphere();
@@ -535,11 +553,23 @@ function ngonVertices( n, radius )
 function ngonModel( n, radius )
 {
     var geometry = new ngonGeometry( n, radius );
-    var material = new THREE.MeshLambertMaterial( { shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
+    var material = new THREE.MeshLambertMaterial( { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
     var mesh = new THREE.Mesh( geometry, material );
+//    mesh.computeFaceNormals();
+//    mesh.computeVertexNormals();
     mesh.position.set(0,40,0);
     scene.add(mesh);
-    return mesh;
+
+    var coneMesh = new THREE.Mesh(
+                              // radius top, radius bottom, height
+         new THREE.CylinderGeometry( 0.1 * radius, 0.0, 1.5 * radius ),
+         new THREE.MeshBasicMaterial( { color: "white" } )
+    );
+    coneMesh.rotation = new THREE.Euler( -90 * RPD, 0, 0 );
+//  coneMesh.rotation = new THREE.Euler( 90 * RPD, 0, 0 );
+
+    coneMesh.position.set(0,40,0);
+    scene.add(coneMesh);
 }        
 
 
