@@ -72,7 +72,7 @@ This is based on template.html which is derived from:
 	Author: Lee Stemkoski
 	Date: July 2013 (three.js v59dev)
 
-Unneed code has been removed. Restore as needed.
+Unneeded code has been removed. Restore as needed.
 */
 
 // MAIN
@@ -112,29 +112,11 @@ function init()
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
 	// LIGHT
-  var lights = FourLights();
-  console.log( "lights: " + lights);
-  console.log( lights.name );
-  console.log( lights );
-  
-  scene.add( lights );
-  wruHub.fourLights = lights;
-
-
-  /************************* hide for FourLights devel
-	var light1 = new THREE.PointLight(0xffffff);
-	light1.position.set(100,250,100);
-	scene.add(light1);
-	var light2 = new THREE.PointLight(0xffffff);
-	light2.position.set(.100,-250,100);
-	scene.add(light2);
-  var amblight = new THREE.AmbientLight( 0x444444 );
-  scene.add(amblight);
-  ******************************/
+  scene.add( FourLights() );
 
   var color1 = new THREE.Color( 0x777777 ) ;
   var color2 = new THREE.Color( 0xeeeeee ) ;
-//  scene.add( makeFloor( color1, color2, 1, 1 ));  FIXME */
+  scene.add( makeFloor( color1, color2, 1, 1 ));
 //  scene.add( new THREE.AxisHelper(100) );
 // ( dir, origin, length, color, headLength, headWidth ) {
   scene.add( new THREE.ArrowHelper(
@@ -153,7 +135,7 @@ function init()
 	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
 	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-////	scene.add(skyBox);
+  scene.add(skyBox);
 	
 	////////////
 	//  GUI   //
@@ -193,7 +175,6 @@ function init()
   gui.add( gui_parameters, 'model',
                 [ "None", "Box", "Pentagon", "ButterFly", "WIP", "Reducks" ] )
           .onChange( function(value) { changeModel( value ) } );
-
 
 
   function paintfloor()
@@ -299,13 +280,13 @@ function ReducksModel( fvRadius )
   console.log( "tilt " + tilt / RPD ) ;
 
   var geometry = new ngonGeometry( 5, fvRadius );
+// While once understood to be required, these seemed to turn the geometry
+// inside out with respect to the lighting. 
 //  geometry.computeFaceNormals();
 //  geometry.computeVertexNormals();
 
   var redMaterial = new THREE.MeshLambertMaterial(
-//      { side: THREE.DoubleSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
-//      { side: THREE.BackSide, shading: THREE.FlatShading, wireframe:false, color: "red"}
       );
   var redMesh = new THREE.Mesh( geometry, redMaterial );
 
@@ -315,7 +296,6 @@ function ReducksModel( fvRadius )
          new THREE.MeshBasicMaterial( { color: "white" } )
      );
   coneMesh.rotation = new THREE.Euler( -90 * RPD, 0, 0 );
-//  coneMesh.rotation = new THREE.Euler( 90 * RPD, 0, 0 );
 
   var protoFace = new THREE.Object3D();
   protoFace.add( redMesh );
@@ -323,17 +303,11 @@ function ReducksModel( fvRadius )
 
   protoFace.position = new THREE.Vector3( Math.cos(tilt) * sfRadius,
       Math.sin(tilt) * sfRadius, 0 );
-  console.log( "protoFace.position " + protoFace.position );
-  console.log( protoFace.position ) ;
-  protoFace.rotation = new THREE.Euler(
-      +18 * RPD,
-//      -18 * RPD,
-      +90 * RPD,
-//      -90 * RPD,
-      tilt,
-      'ZXY' );
-  console.log( "protoFace.rotation " + protoFace.rotation );
-  console.log( protoFace.rotation ) ;
+//  console.log( "protoFace.position " + protoFace.position );
+//  console.log( protoFace.position ) ;
+  protoFace.rotation = new THREE.Euler( +18 * RPD, +90 * RPD, tilt, 'ZXY' );
+//  console.log( "protoFace.rotation " + protoFace.rotation );
+//  console.log( protoFace.rotation ) ;
 
   var bowlObjs = new THREE.Object3D();
   
@@ -341,7 +315,7 @@ function ReducksModel( fvRadius )
   obj0.add( protoFace );
   bowlObjs.add(obj0);
 
-  /*******************************************************************/
+  // Loopificationizing needed. FIXME
   var obj1 = obj0.clone();
   obj1.rotation = new THREE.Euler( 0, 1 * 72 * RPD, 0,'XYZ');
   bowlObjs.add(obj1);
@@ -368,7 +342,7 @@ function ReducksModel( fvRadius )
 
   var topBowl = bowlObjs.clone();
   topBowl.rotation = new THREE.Euler( 0, 0, 180 * RPD );
-/**************************************************************/
+
   var thing = new THREE.Object3D();
   thing.add( bowlObjs );
   thing.add( topBowl );
@@ -429,7 +403,6 @@ function WIPModel( outRadius )
   obj.add( greenMesh );
   obj.add( yellowMesh );
 
-  /*********************** EXPERIMENT *********/
 
   var obja = obj.clone() ;
   var objb = obj.clone() ;
@@ -447,9 +420,6 @@ function WIPModel( outRadius )
   objx.add( obja );
   objx.add( objb );
   return objx;
-  
-  /*********************** END EXPERIMENT *********/
-  return obj;
 }
 
 function butterFlyModel0( outRadius )
@@ -555,8 +525,6 @@ function ngonModel( n, radius )
     var geometry = new ngonGeometry( n, radius );
     var material = new THREE.MeshLambertMaterial( { side: THREE.FrontSide, shading: THREE.FlatShading, wireframe:false, color: 0x999900 } );
     var mesh = new THREE.Mesh( geometry, material );
-//    mesh.computeFaceNormals();
-//    mesh.computeVertexNormals();
     mesh.position.set(0,40,0);
     scene.add(mesh);
 
@@ -566,7 +534,6 @@ function ngonModel( n, radius )
          new THREE.MeshBasicMaterial( { color: "white" } )
     );
     coneMesh.rotation = new THREE.Euler( -90 * RPD, 0, 0 );
-//  coneMesh.rotation = new THREE.Euler( 90 * RPD, 0, 0 );
 
     coneMesh.position.set(0,40,0);
     scene.add(coneMesh);
