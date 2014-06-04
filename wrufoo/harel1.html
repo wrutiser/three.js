@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title> Harel1 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!--
+    <link rel=stylesheet href="css/base.css"/>
+-->
+</head>
+<body>
+
+    Nothing to see here. Open the console.
+<!-- ------------------------------------------------------------ -->
+<!--
+<script src="../build/Three.js"></script>
+<script src="../examples/js/controls/OrbitControls.js"></script>
+<script src="libs/DAT.GUI.min.js"></script>
+<div id="ThreeJS" style="z-index: 0; position: absolute; left:0px; top:0px"></div>  
+------------------------------------------------------------ -->
+<script>
+'use strict';
+
+// FIXME for now, largest face should be first in vertexConfiguration. 
+// FIXME for now, ns[i] must be an integer so density is 1.
+// FIXME for now, m[i] must be 1.
+
+
+// FIXME just for experimentation
+var alphas;
+var gammas;
+var delta;
+var cos_a;
+function foo( vertexConfiguration )
+{
+    var MAX_ITERATIONS = 20;
+    var CLOSE_ENOUGH = 1E-15;
+    var PI = Math.PI;
+    var DPR = 180 / PI;
+    console.log( '\n **** ns: ' + vertexConfiguration ) ;
+    var m = vertexConfiguration.length;
+    var ns = vertexConfiguration;
+    alphas = [];
+    gammas = [];
+    var i;
+    // Initial approximation
+    for( i = 0; i < m; i+=1 )
+    {
+      alphas.push( PI / ns[i] );
+      gammas.push( PI/2 - alphas[i] );
+    }
+    console.log( 'alphas: ' + alphas );
+    console.log( 'gammas: ' + gammas );
+    var iters = 0;
+    while( iters < MAX_ITERATIONS )
+    {
+        console.log( 'iteration: ' + iters );
+        iters += 1;
+        // Compute excess
+        var delta = PI;
+        for( i = 0; i < m; i += 1 )
+        {
+          delta -= gammas[i];
+        }
+
+        if( Math.abs( delta ) <= CLOSE_ENOUGH   ) {
+          console.log( 'Exiting iteration. iters: ' + iters + '  delta: ' + delta );
+          break;
+        }
+
+        var sumTans = 0;
+        for( i = 0; i < m; i += 1 )
+        {
+          sumTans += Math.tan( gammas[ i ] );
+        } 
+
+        var gamma0hat = gammas[0] + delta * Math.tan( gammas[0] ) / sumTans ;
+        // console.log( 'gamma0hat: ' + gamma0hat ) ;
+
+        gammas[0] = gamma0hat;
+
+        cos_a = Math.cos( alphas[ 0 ] ) / Math.sin( gammas[0] );
+        var aa = Math.acos( cos_a );
+        // console.log( 'cos_a: ' + cos_a );
+
+        for( i = 1; i < m ; i += 1 )
+        {
+          gammas[ i ] = Math.asin( Math.cos( alphas[ i ] ) / cos_a );
+        }
+        // console.log( 'gammas: ' + gammas );
+    }
+    if( iters >= MAX_ITERATIONS )
+    { 
+      alert( 'MAX_ITERATIONS exceeded. delta: ' + delta );
+    }
+
+    console.log( 'gammas: ' + gammas );
+
+    console.log( 'alphas: ' + asDegrees( alphas ) );
+    console.log( 'gammas: ' + asDegrees( gammas ) );
+
+    var cs = [];
+    var bs = [];
+    for( i = 0; i < m; i += 1 )
+    {
+      bs.push( Math.acos(
+              1 / ( Math.tan( alphas[ i ] ) * Math.tan( gammas[ i ] ) )
+          ) );
+      cs.push( Math.acos(
+            Math.cos( gammas[ i ] ) / Math.sin( alphas[ i ] ) 
+          ) );
+    }
+    
+    console.log( 'as: ' + asDegrees( [ Math.acos(cos_a ) ]  ) );
+    console.log( 'bs: ' + asDegrees( bs ) );
+    console.log( 'cs: ' + asDegrees( cs ) );
+
+    // Metrical Properties
+    // R -- Circumradius
+    var R = 1;
+    // rho -- midradius
+    var rho = R * cos_a;
+    // l -- semiedge
+    var l = rho * Math.tan( aa );
+
+    var rs = [];
+    var hs = [];
+    var thetas = [];
+    var phis = [];
+    for( i = 0; i < m; i+=1 )
+    {
+      // r_i -- inradius
+      rs.push( rho * Math.cos( cs[ i ] ) );
+      // h_i -- facial inradius
+      hs.push( rs[ i ] * Math.tan( cs[ i ] ) );
+      // theta_i -- facial angle
+      thetas.push( PI - 2 * alphas[ i ] );
+      // phi_i -- dihedral angle
+      phis.push( PI - cs[ i ] - cs[ wrapAround( i, m  ) ] );
+    }
+    console.log( "R: " + R + "  rho: "  + rho  + "  l:" + l );
+    console.log( "rs: " + rs );
+    console.log( "hs: " + hs );
+    console.log( "thetas: " + asDegrees( thetas ) );
+    console.log( "phis: " + asDegrees( phis ) );  
+}
+
+function asDegrees( radians )
+{
+  var degrees = [];
+  var i;
+  for( i = 0; i < radians.length; i++ )
+  {
+    degrees.push( radians[ i ] * 180 / Math.PI );
+  }
+  return degrees;
+}
+
+function wrapAround( i, m )
+{
+  if( i + 1 == m ) {
+    return 0;
+  } else {
+    return i + 1 ;
+  }
+}
+  
+foo( [4,3,4,3] );
+    
+foo( [3,3,3] );
+foo( [4,4,4] );
+foo( [3,3,3,3] );
+
+
+</script>
+</body>
+</html>
