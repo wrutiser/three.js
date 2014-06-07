@@ -25,37 +25,159 @@
 // FIXME for now, ns[i] must be an integer so density is 1.
 // FIXME for now, m[i] must be 1.
 
-
-// FIXME just for experimentation
-var alphas;
-var gammas;
-var delta;
-var cos_a;
 function foo( vertexConfiguration )
+{
+  console.log( '\n-----------------\n ns: ' + vertexConfiguration ) ;
+  var props = fundamentalTriangle( vertexConfiguration );
+  showProperties( props );
+}
+
+var objectID = function() { // open IIFE
+  var objectIDglobal = 100;
+  return function()
+  {
+    var z = objectIDglobal;
+    objectIDglobal += 1;
+    return z;
+  }
+}();  // close IIFE
+
+function trueMod( i, n )
+{
+    return ( i % n + n ) % n
+}
+
+function mkVertex( valence )
+{
+    var newVertex = {
+       ngons: Array( valence ),
+       corners: Array( valence ),
+       id: objectID(),
+    };
+
+    return newVertex;
+}    
+
+function showVertex( vertex )
+{
+  console.log( 'id: ', vertex.id );
+  console.log( 'ngons: ', vertex.ngons, vertex.ngons.length );
+  console.log( 'corners:', vertex.corners, vertex.corners.length );
+}
+
+// showVertex( mkVertex( 4 ) );
+
+function mkFace( valence )
+{
+   var newFace = {
+     vertices: Array( valence ),
+     id: objectID(),
+   };
+
+   return newFace;
+}
+
+function showFace( face )
+{
+  console.log( 'id: ', face.id );
+  console.log( 'ngons: ', face.vertices, face.vertices.length );
+}
+
+//showFace( mkFace( 4 ) );
+//showFace( mkFace( 3 ) );
+
+function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
+{
+// FIXME -- assume vertex is empty
+    var vertex_a = mkVertex( vertexValence );
+    showVertex( vertex_a );
+    vertex_a.ngons[ 0 ] = thisFace;
+    vertex_a.corners[ 0 ] = thisCorner;
+    vertex_a.ngons[ 3 ] = thatFace;
+    vertex_a.corners[ 3 ] = thatCorner;
+    thisFace.vertices[0] = vertex_a;
+    thatFace.vertices[0] = vertex_a;
+
+    var vertex_b = mkVertex( vertexValence );
+    vertex_b.ngons[ 1 ] = thisFace;
+    vertex_b.corners[ 1 ] = thisCorner + 1;
+    vertex_b.ngons[ 2 ] = thatFace;
+    vertex_b.corners[ 2 ] = thatCorner - 1;
+    thisFace.vertices[1] = vertex_b;
+    thatFace.vertices[2] = vertex_b;
+}
+
+var sqF = mkFace( 4 );
+console.log( 'sqF: ', sqF );
+var triF = mkFace( 3 );
+console.log( 'triF: ', triF );
+
+attachFace( 4, sqF, triF, 0, 0 );
+
+console.log( 'sqF: ', sqF );
+console.log( 'triF: ', triF );
+
+console.log( 'sqF.vertices', sqF.vertices );
+console.log( 'triF.vertices', triF.vertices );
+
+
+/**************************
+function addFace( parentFace, parentSide, nEdges, v_0, v_1 )
+{
+  // create new face
+
+  var newFace = {
+    id: objectID(),
+    parentFace: parentFace,
+    nEdges: nEdges,
+    neighbors: [ parentFace ],
+    vertices: [ v_0, v_1 ],
+  };
+
+  parentFace.neighbors[ parentSide ] = newFace;
+
+  return newFace;
+}
+var tstFace = {
+  id: objectID(),
+  nEdges:6,
+  neighbors: [10,20,30,40,50,60 ],
+  vertices: [ 200,201,202,203,204,205  ],
+  };
+
+console.log( addFace( tstFace, 3, 4, 204, 203) );
+console.log( tstFace );
+
+***********************************/
+////////////////////////////////////////////////////////////////////
+
+function fundamentalTriangle( vertexConfiguration )
 {
     var MAX_ITERATIONS = 20;
     var CLOSE_ENOUGH = 1E-15;
     var PI = Math.PI;
     var DPR = 180 / PI;
-    console.log( '\n **** ns: ' + vertexConfiguration ) ;
     var m = vertexConfiguration.length;
     var ns = vertexConfiguration;
-    alphas = [];
-    gammas = [];
-    var i;
+
+    // Angles of fundamental spherical right triangles
+    var alphas = [];
+    var gammas = [];
+    
+    var i;    // multiple use loop index
     // Initial approximation
     for( i = 0; i < m; i+=1 )
     {
       alphas.push( PI / ns[i] );
       gammas.push( PI/2 - alphas[i] );
     }
-    console.log( 'alphas: ' + alphas );
-    console.log( 'gammas: ' + gammas );
+
     var iters = 0;
     while( iters < MAX_ITERATIONS )
     {
-        console.log( 'iteration: ' + iters );
+        // console.log( 'iteration: ' + iters );
         iters += 1;
+
         // Compute excess
         var delta = PI;
         for( i = 0; i < m; i += 1 )
@@ -75,11 +197,9 @@ function foo( vertexConfiguration )
         } 
 
         var gamma0hat = gammas[0] + delta * Math.tan( gammas[0] ) / sumTans ;
-        // console.log( 'gamma0hat: ' + gamma0hat ) ;
-
         gammas[0] = gamma0hat;
 
-        cos_a = Math.cos( alphas[ 0 ] ) / Math.sin( gammas[0] );
+        var cos_a = Math.cos( alphas[ 0 ] ) / Math.sin( gammas[0] );
         var aa = Math.acos( cos_a );
         // console.log( 'cos_a: ' + cos_a );
 
@@ -87,18 +207,15 @@ function foo( vertexConfiguration )
         {
           gammas[ i ] = Math.asin( Math.cos( alphas[ i ] ) / cos_a );
         }
-        // console.log( 'gammas: ' + gammas );
     }
     if( iters >= MAX_ITERATIONS )
     { 
       alert( 'MAX_ITERATIONS exceeded. delta: ' + delta );
     }
 
-    console.log( 'gammas: ' + gammas );
 
-    console.log( 'alphas: ' + asDegrees( alphas ) );
-    console.log( 'gammas: ' + asDegrees( gammas ) );
-
+    // Sides of fundamental triangle.
+    // aa is third side.
     var cs = [];
     var bs = [];
     for( i = 0; i < m; i += 1 )
@@ -111,9 +228,6 @@ function foo( vertexConfiguration )
           ) );
     }
     
-    console.log( 'as: ' + asDegrees( [ Math.acos(cos_a ) ]  ) );
-    console.log( 'bs: ' + asDegrees( bs ) );
-    console.log( 'cs: ' + asDegrees( cs ) );
 
     // Metrical Properties
     // R -- Circumradius
@@ -136,15 +250,43 @@ function foo( vertexConfiguration )
       // theta_i -- facial angle
       thetas.push( PI - 2 * alphas[ i ] );
       // phi_i -- dihedral angle
-      phis.push( PI - cs[ i ] - cs[ wrapAround( i, m  ) ] );
+      phis.push( PI - cs[ i ] - cs[ (i + 1) % m] );
     }
-    console.log( "R: " + R + "  rho: "  + rho  + "  l:" + l );
-    console.log( "rs: " + rs );
-    console.log( "hs: " + hs );
-    console.log( "thetas: " + asDegrees( thetas ) );
-    console.log( "phis: " + asDegrees( phis ) );  
+
+    // Collect properties
+    var properties = {}
+    properties.ns = ns;
+    properties.alphas = alphas;
+    properties.gammas = gammas;
+    properties.aa = aa;
+    properties.bs = bs;
+    properties.cs = cs;
+    properties.R = R;
+    properties.rho = rho;
+    properties.l = l;
+    properties.rs = rs;
+    properties.hs = hs;
+    properties.thetas = thetas;
+    properties.phis = phis;
+
+    return properties;
 }
 
+function showProperties( ps )
+{
+    console.log( "ns: " + ps.ns );
+    console.log( 'alphas: ' + asDegrees( ps.alphas ) );
+    console.log( 'gammas: ' + asDegrees( ps.gammas ) );
+    console.log( 'aa: ' + asDegrees( [ ps.aa ] ) );
+    console.log( 'bs: ' + asDegrees( ps.bs ) );
+    console.log( 'cs: ' + asDegrees( ps.cs ) );
+    console.log( "R: " + ps.R + "  rho: "  + ps.rho  + "  l: " + ps.l );
+    console.log( "rs: " + ps.rs );
+    console.log( "hs: " + ps.hs );
+    console.log( "thetas: " + asDegrees( ps.thetas ) );
+    console.log( "phis: " + asDegrees( ps.phis ) );  
+
+}
 function asDegrees( radians )
 {
   var degrees = [];
@@ -156,21 +298,13 @@ function asDegrees( radians )
   return degrees;
 }
 
-function wrapAround( i, m )
-{
-  if( i + 1 == m ) {
-    return 0;
-  } else {
-    return i + 1 ;
-  }
-}
+/**********
   
 foo( [4,3,4,3] );
-    
 foo( [3,3,3] );
 foo( [4,4,4] );
 foo( [3,3,3,3] );
-
+*************/
 
 </script>
 </body>
