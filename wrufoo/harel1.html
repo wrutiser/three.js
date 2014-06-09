@@ -32,13 +32,17 @@ function foo( vertexConfiguration )
   showProperties( props );
 }
 
-var objectID = function() { // open IIFE
+var objectID = function( ) { // open IIFE
   var objectIDglobal = 100;
-  return function()
+  return function( prefix )
   {
     var z = objectIDglobal;
     objectIDglobal += 1;
-    return z;
+    if( prefix === undefined )
+    {
+        prefix = ''
+    }
+    return prefix + z;
   }
 }();  // close IIFE
 
@@ -50,9 +54,9 @@ function trueMod( i, n )
 function mkVertex( valence )
 {
     var newVertex = {
-       ngons: Array( valence ),
+       // ngons: Array( valence ),
        corners: Array( valence ),
-       id: objectID(),
+       id: objectID( 'V' ),
     };
 
     return newVertex;
@@ -61,31 +65,78 @@ function mkVertex( valence )
 function showVertex( vertex )
 {
   console.log( 'id: ', vertex.id );
-  console.log( 'ngons: ', vertex.ngons, vertex.ngons.length );
+  //  console.log( 'ngons: ', vertex.ngons, vertex.ngons.length );
   console.log( 'corners:', vertex.corners, vertex.corners.length );
 }
 
-// showVertex( mkVertex( 4 ) );
+showVertex( mkVertex( 4 ) );
 
-function mkFace( valence )
+function mkCorner( aFace )
 {
-   var newFace = {
-     vertices: Array( valence ),
-     id: objectID(),
-   };
+    var newCorner = {
+      face: aFace,
+      vertex: undefined,
+      id: objectID( 'C' ),
+    }
+    return newCorner;
+}
 
-   return newFace;
+function mkFace( nSides )
+{
+    var newFace = {
+      corners: Array( nSides ),
+      id: objectID( 'F' ),
+    };
+    var i;
+    for( i = 0; i < nSides; i +=1 ){
+        newFace.corners[ i ] = mkCorner( newFace );
+    }
+
+    return newFace;
 }
 
 function showFace( face )
 {
   console.log( 'id: ', face.id );
-  console.log( 'ngons: ', face.vertices, face.vertices.length );
+  console.log( 'corners: ', face.corners, face.corners.length );
+  console.log( 'corner 0:', face.corners[0] );
 }
 
-//showFace( mkFace( 4 ) );
-//showFace( mkFace( 3 ) );
+showFace( mkFace( 4 ) );
+showFace( mkFace( 3 ) );
 
+function attachFace( vertexValence, thisFace, thisCorner, thatFace, thatCorner )  
+{
+    var thisV = thisFace.corners[ thisCorner ];
+    var V = thatFace.corners[ thatCorner ];
+    var theV;
+
+    if( thisV === undefined ){
+        if( thatV === undefined ) {
+            theV = mkVertex( vertexValence );
+            thisFace.corners[ thisCorner ] = theV;
+            thatFace.corners[ thatCorner ] = theV;
+        } else {
+            thisFace.corners[ thisCorner ] = thatV;
+            theV = thatV;
+        }
+    } else {
+        if( thatV === undefined ) {
+            thatFace.corners[ thatCorner ] = thisV;
+            theV = thisV;
+        } else {
+            console.assert( thisV == thatV, 'thisV != thatV' );
+            theV = thisV;
+        }
+    }    
+    
+//FIXME -- this is likely wrong
+
+
+
+}
+
+/*************************
 function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
 {
 // FIXME -- assume vertex is empty
@@ -106,7 +157,7 @@ function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
     thisFace.vertices[1] = vertex_b;
     thatFace.vertices[2] = vertex_b;
 }
-
+************************/
 var sqF = mkFace( 4 );
 console.log( 'sqF: ', sqF );
 var triF = mkFace( 3 );
