@@ -105,6 +105,53 @@ function showFace( face )
 showFace( mkFace( 4 ) );
 showFace( mkFace( 3 ) );
 
+/**** Perimeter *********************/
+
+function mkPerimeter( )
+{
+    var newPerimeter = {
+      vs: [],   // vertices
+      ix: 0,    // scanning index
+    };
+    return newPerimeter;
+}
+
+
+var thePerimeter = mkPerimeter();
+
+function insertVertex( vertex, position )
+{
+    thePerimeter.vs.splice( position, 0, vertex );
+}
+
+function deleteVertex( position )
+{
+    thePerimeter.vs.splice( position, 1 );
+}
+function showPerimeter()
+{
+    var tp = thePerimeter;
+    console.log( 'thePerimeter', 'length: ' + tp.vs.length, 'ix: ' + tp.ix  );
+    var i;
+    for( i = 0; i < tp.vs.length; i += 1 )
+    {
+      console.log( i, tp.vs[ i ] );
+    }
+}
+
+showPerimeter();
+insertVertex( mkVertex( 3 ), 0 );
+insertVertex( mkVertex( 4 ), 0 );
+insertVertex( mkVertex( 5 ), 0 );
+showPerimeter();
+deleteVertex( 1 );
+showPerimeter();
+insertVertex( mkVertex( 6 ), -1 );
+showPerimeter();
+deleteVertex( 2 );
+showPerimeter();
+
+/*************************
 function attachFace( vertexValence, thisFace, thisCorner, thatFace, thatCorner )  
 {
     var thisV = thisFace.corners[ thisCorner ];
@@ -136,7 +183,19 @@ function attachFace( vertexValence, thisFace, thisCorner, thatFace, thatCorner )
 
 }
 
-/*************************
+var sqF = mkFace( 4 );
+console.log( 'sqF: ', sqF );
+var triF = mkFace( 3 );
+console.log( 'triF: ', triF );
+
+attachFace( 4, sqF, triF, 0, 0 );
+
+console.log( 'sqF: ', sqF );
+console.log( 'triF: ', triF );
+
+console.log( 'sqF.vertices', sqF.vertices );
+console.log( 'triF.vertices', triF.vertices );
+
 function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
 {
 // FIXME -- assume vertex is empty
@@ -157,7 +216,6 @@ function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
     thisFace.vertices[1] = vertex_b;
     thatFace.vertices[2] = vertex_b;
 }
-************************/
 var sqF = mkFace( 4 );
 console.log( 'sqF: ', sqF );
 var triF = mkFace( 3 );
@@ -171,6 +229,7 @@ console.log( 'triF: ', triF );
 console.log( 'sqF.vertices', sqF.vertices );
 console.log( 'triF.vertices', triF.vertices );
 
+************************/
 
 /**************************
 function addFace( parentFace, parentSide, nEdges, v_0, v_1 )
