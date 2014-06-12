@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <title> Harel1 </title>
+    <title> HookEyes </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <!--
@@ -20,17 +20,6 @@
 ------------------------------------------------------------ -->
 <script>
 'use strict';
-
-// FIXME for now, largest face should be first in vertexConfiguration. 
-// FIXME for now, ns[i] must be an integer so density is 1.
-// FIXME for now, m[i] must be 1.
-
-function foo( vertexConfiguration )
-{
-  console.log( '\n-----------------\n ns: ' + vertexConfiguration ) ;
-  var props = fundamentalTriangle( vertexConfiguration );
-  showProperties( props );
-}
 
 var objectID = function( ) { // open IIFE
   var objectIDglobal = 100;
@@ -259,162 +248,6 @@ console.log( addFace( tstFace, 3, 4, 204, 203) );
 console.log( tstFace );
 
 ***********************************/
-////////////////////////////////////////////////////////////////////
-
-function fundamentalTriangle( vertexConfiguration )
-{
-    var MAX_ITERATIONS = 20;
-    var CLOSE_ENOUGH = 1E-15;
-    var PI = Math.PI;
-    var DPR = 180 / PI;
-    var m = vertexConfiguration.length;
-    var ns = vertexConfiguration;
-
-    // Angles of fundamental spherical right triangles
-    var alphas = [];
-    var gammas = [];
-    
-    var i;    // multiple use loop index
-    // Initial approximation
-    for( i = 0; i < m; i+=1 )
-    {
-      alphas.push( PI / ns[i] );
-      gammas.push( PI/2 - alphas[i] );
-    }
-
-    var iters = 0;
-    while( iters < MAX_ITERATIONS )
-    {
-        // console.log( 'iteration: ' + iters );
-        iters += 1;
-
-        // Compute excess
-        var delta = PI;
-        for( i = 0; i < m; i += 1 )
-        {
-          delta -= gammas[i];
-        }
-
-        if( Math.abs( delta ) <= CLOSE_ENOUGH   ) {
-          console.log( 'Exiting iteration. iters: ' + iters + '  delta: ' + delta );
-          break;
-        }
-
-        var sumTans = 0;
-        for( i = 0; i < m; i += 1 )
-        {
-          sumTans += Math.tan( gammas[ i ] );
-        } 
-
-        var gamma0hat = gammas[0] + delta * Math.tan( gammas[0] ) / sumTans ;
-        gammas[0] = gamma0hat;
-
-        var cos_a = Math.cos( alphas[ 0 ] ) / Math.sin( gammas[0] );
-        var aa = Math.acos( cos_a );
-        // console.log( 'cos_a: ' + cos_a );
-
-        for( i = 1; i < m ; i += 1 )
-        {
-          gammas[ i ] = Math.asin( Math.cos( alphas[ i ] ) / cos_a );
-        }
-    }
-    if( iters >= MAX_ITERATIONS )
-    { 
-      alert( 'MAX_ITERATIONS exceeded. delta: ' + delta );
-    }
-
-
-    // Sides of fundamental triangle.
-    // aa is third side.
-    var cs = [];
-    var bs = [];
-    for( i = 0; i < m; i += 1 )
-    {
-      bs.push( Math.acos(
-              1 / ( Math.tan( alphas[ i ] ) * Math.tan( gammas[ i ] ) )
-          ) );
-      cs.push( Math.acos(
-            Math.cos( gammas[ i ] ) / Math.sin( alphas[ i ] ) 
-          ) );
-    }
-    
-
-    // Metrical Properties
-    // R -- Circumradius
-    var R = 1;
-    // rho -- midradius
-    var rho = R * cos_a;
-    // l -- semiedge
-    var l = rho * Math.tan( aa );
-
-    var rs = [];
-    var hs = [];
-    var thetas = [];
-    var phis = [];
-    for( i = 0; i < m; i+=1 )
-    {
-      // r_i -- inradius
-      rs.push( rho * Math.cos( cs[ i ] ) );
-      // h_i -- facial inradius
-      hs.push( rs[ i ] * Math.tan( cs[ i ] ) );
-      // theta_i -- facial angle
-      thetas.push( PI - 2 * alphas[ i ] );
-      // phi_i -- dihedral angle
-      phis.push( PI - cs[ i ] - cs[ (i + 1) % m] );
-    }
-
-    // Collect properties
-    var properties = {}
-    properties.ns = ns;
-    properties.alphas = alphas;
-    properties.gammas = gammas;
-    properties.aa = aa;
-    properties.bs = bs;
-    properties.cs = cs;
-    properties.R = R;
-    properties.rho = rho;
-    properties.l = l;
-    properties.rs = rs;
-    properties.hs = hs;
-    properties.thetas = thetas;
-    properties.phis = phis;
-
-    return properties;
-}
-
-function showProperties( ps )
-{
-    console.log( "ns: " + ps.ns );
-    console.log( 'alphas: ' + asDegrees( ps.alphas ) );
-    console.log( 'gammas: ' + asDegrees( ps.gammas ) );
-    console.log( 'aa: ' + asDegrees( [ ps.aa ] ) );
-    console.log( 'bs: ' + asDegrees( ps.bs ) );
-    console.log( 'cs: ' + asDegrees( ps.cs ) );
-    console.log( "R: " + ps.R + "  rho: "  + ps.rho  + "  l: " + ps.l );
-    console.log( "rs: " + ps.rs );
-    console.log( "hs: " + ps.hs );
-    console.log( "thetas: " + asDegrees( ps.thetas ) );
-    console.log( "phis: " + asDegrees( ps.phis ) );  
-
-}
-function asDegrees( radians )
-{
-  var degrees = [];
-  var i;
-  for( i = 0; i < radians.length; i++ )
-  {
-    degrees.push( radians[ i ] * 180 / Math.PI );
-  }
-  return degrees;
-}
-
-/**********
-  
-foo( [4,3,4,3] );
-foo( [3,3,3] );
-foo( [4,4,4] );
-foo( [3,3,3,3] );
-*************/
 
 </script>
 </body>
