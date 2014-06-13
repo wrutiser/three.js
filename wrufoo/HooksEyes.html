@@ -35,41 +35,74 @@ var objectID = function( ) { // open IIFE
   }
 }();  // close IIFE
 
+console.log( objectID('TST') );
+
 function trueMod( i, n )
 {
     return ( i % n + n ) % n
 }
 
-function mkVertex( valence )
-{
-    var newVertex = {
-       // ngons: Array( valence ),
-       corners: Array( valence ),
-       id: objectID( 'V' ),
-    };
+console.assert( trueMod( -3, 5 ) === 2, 'trueMod' );
+console.assert( trueMod(  3, 5 ) === 3, 'trueMod' );
 
-    return newVertex;
-}    
 
-function showVertex( vertex )
+function Vertex( figure )
 {
-  console.log( 'id: ', vertex.id );
-  //  console.log( 'ngons: ', vertex.ngons, vertex.ngons.length );
-  console.log( 'corners:', vertex.corners, vertex.corners.length );
+    this.id = objectID( 'V' )
+    this.figure = figure;
+    this.faces = new Array( figure.length );
+    this.corners = new Array( figure.length );
+
+    this.iNeg  = 0;
+    this.iPos  = 0;
+}
+// slot i is assigned IFF iNeg <= i && iPos < i
+
+Vertex.prototype.addCornerNeg = function( aFace, aCorner )
+{
+    this.iNeg = trueMod( this.iNeg - 1, this.figure.length );
+    this.faces[ this.iNeg ] = aFace;
+    this.corners[ this.iNeg ] = aCorner;
 }
 
-showVertex( mkVertex( 4 ) );
 
-function mkCorner( aFace )
+Vertex.prototype.addCornerPos = function( aFace, aCorner )
 {
-    var newCorner = {
-      face: aFace,
-      vertex: undefined,
-      id: objectID( 'C' ),
-    }
-    return newCorner;
+    this.faces[ this.iPos ] = aFace;
+    this.corners[ this.iPos ] = aCorner;
+    this.iPos = trueMod( this.iPos + 1, this.figure.length );
 }
 
+var testVertex = new Vertex( [3,2,3,2,3] );
+  
+console.log( 'testVertex', testVertex );
+
+testVertex.addCornerPos( 'foo', 'a' );
+testVertex.addCornerNeg( 'foo', 'z' );
+testVertex.addCornerPos( 'foo', 'b' );
+testVertex.addCornerNeg( 'foo', 'y' );
+testVertex.addCornerNeg( 'foo', 'x' );
+
+console.log( 'testVertex', testVertex );
+
+function Face( nSides )
+{
+  this.id = objectID( 'F' );
+  this.vertices = Array( nSides );
+  this.nSides = nSides;
+}
+
+console.log( new Face( 3 ) );
+
+
+/******************************************************
+************************************/
+
+//////////////////////////////////////////////////////
+// OLD STUFF
+/////////////////////////////////////////////////////
+
+/*************************************************************************
 function mkFace( nSides )
 {
     var newFace = {
@@ -94,7 +127,9 @@ function showFace( face )
 showFace( mkFace( 4 ) );
 showFace( mkFace( 3 ) );
 
-/**** Perimeter *********************/
+*************************************************************************/
+
+/***************************************************************
 
 function mkPerimeter( )
 {
@@ -140,7 +175,6 @@ showPerimeter();
 deleteVertex( 2 );
 showPerimeter();
 
-/*************************
 function attachFace( vertexValence, thisFace, thisCorner, thatFace, thatCorner )  
 {
     var thisV = thisFace.corners[ thisCorner ];
@@ -184,6 +218,9 @@ console.log( 'triF: ', triF );
 
 console.log( 'sqF.vertices', sqF.vertices );
 console.log( 'triF.vertices', triF.vertices );
+
+
+
 
 function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
 {
