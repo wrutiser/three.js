@@ -35,7 +35,7 @@ var objectID = function( ) { // open IIFE
   }
 }();  // close IIFE
 
-console.log( objectID('TST') );
+//console.log( objectID('TST') );
 
 function trueMod( i, n )
 {
@@ -58,13 +58,27 @@ function Vertex( figure )
 }
 // slot i is assigned IFF iNeg <= i && iPos < i
 
+Vertex.prototype.face = function( i )
+{
+    return this.faces[ trueMod( i, this.figure.length ) ];
+}
+
+Vertex.prototype.corner = function( i )
+{
+    return this.corners[ trueMod( i, this.figure.length ) ];
+}
+
+Vertex.prototype.sides = function( i )
+{
+    return this.figure[ trueMod( i, this.figure.length ) ];
+}
+
 Vertex.prototype.addCornerNeg = function( aFace, aCorner )
 {
     this.iNeg = trueMod( this.iNeg - 1, this.figure.length );
     this.faces[ this.iNeg ] = aFace;
     this.corners[ this.iNeg ] = aCorner;
 }
-
 
 Vertex.prototype.addCornerPos = function( aFace, aCorner )
 {
@@ -73,9 +87,18 @@ Vertex.prototype.addCornerPos = function( aFace, aCorner )
     this.iPos = trueMod( this.iPos + 1, this.figure.length );
 }
 
+Vertex.prototype.show = function( label )
+{
+    console.log( '\n' + label, 'id: ' + this.id, '  iNeg: ' + this.iNeg, '  iPos: ' + this.iPos );
+    var i;
+    for( i = this.iNeg; i < this.iPos; i += 1 )
+    {
+      console.log( i, this.figure[i], this.faces[i].id, this.corners[i] );
+    }
+}
 var testVertex = new Vertex( [3,2,3,2,3] );
   
-console.log( 'testVertex', testVertex );
+//console.log( 'testVertex', testVertex );
 
 testVertex.addCornerPos( 'foo', 'a' );
 testVertex.addCornerNeg( 'foo', 'z' );
@@ -83,7 +106,10 @@ testVertex.addCornerPos( 'foo', 'b' );
 testVertex.addCornerNeg( 'foo', 'y' );
 testVertex.addCornerNeg( 'foo', 'x' );
 
-console.log( 'testVertex', testVertex );
+// testVertex.show();
+// console.log( 'testVertex', testVertex );
+
+console.assert( testVertex.corner(-2) === testVertex.corner( 3 ) );
 
 function Face( nSides )
 {
@@ -92,8 +118,74 @@ function Face( nSides )
   this.nSides = nSides;
 }
 
-console.log( new Face( 3 ) );
+var testFace = new Face( 3 );
 
+Face.prototype.show = function( label )
+{
+    console.log( '\n' + label, 'id: ' + this.id, ' nSides: ' + this.nSides );
+    var i;
+    for( i = 0; i < this.nSides; i += 1 )
+    {
+      var v_i = this.vertices[ i ];
+      if( v_i !== undefined ) {
+          console.log( i + ': ', v_i.id );
+      }
+    }
+}
+
+Face.prototype.vertex = function( i )
+{
+    return this.vertices[ trueMod( i, this.nSides ) ];
+}
+
+//testFace.show( 'foo' );
+
+function fooBuild( figure )
+{
+
+  // The initial face
+    var iVslot = 0;
+    var nSides = figure[ iVslot ] ;
+    var f0 = new Face( nSides );
+  // Going CCW around the face, add a new Vertex to each corner.
+    var v_i;
+    var i;
+    for( i = 0; i < nSides ; i += 1 )
+    {
+        v_i = new Vertex( figure );
+        v_i.addCornerPos( f0, i );
+        f0.vertices[ i ] = v_i;
+    }
+
+///console.log( 'f0: ', f0 );
+
+  // Begin at corner 0 of the initial face.
+  // Add a second face to the vertex after(CCW) the initial face  
+    var v_0 = f0.vertices[ 0 ];
+    console.assert( v_0.iPos === 1 && v_0.iNeg === 0 );
+
+    var nCorners  = v_0.figure[ v_0.iPos ];
+    var f_i = new Face( nCorners );
+  // Connect corner 0 of the face to the vertex
+    v_0.addCornerPos( f_i, 0 );
+    f_i.vertices[ 0 ] = v_0 ;
+  // Connect the next corner of the second face to the previous corner of the first face. 
+    var v_prev = f0.vertex( -1 );
+    v_prev.addCornerPos( f_i, 2 ); //FIXME
+    f_i.vertices[ 2 ] = v_prev ; //FIXME
+  // Add a new Vertex to the remaining corners of the second face.
+    f_i.vertices[ 1 ] = new Vertex( figure ); //FIXME 
+    
+    f0.show( 'f0' );
+    f_i.show( 'f_i' );
+
+    v_0.show( 'v_0' );
+    v_prev.show( 'v_prev' );
+    f_i.vertices[ 1 ].show( 'v_x' );
+
+}  
+
+fooBuild( [4, 3, 4, 3 ] );
 
 /******************************************************
 ************************************/
