@@ -80,6 +80,9 @@ Vertex.prototype.addCornerNeg = function( aFace, aCorner )
       this.faces[ i ] = aFace;
       this.corners[ i ] = aCorner;
       this.iNeg -= 1;
+      
+      var j = trueMod( aCorner, aFace.vertices.length );
+      aFace.vertices[ j ] = this;
 }
 
 Vertex.prototype.addCornerPos = function( aFace, aCorner )
@@ -87,6 +90,8 @@ Vertex.prototype.addCornerPos = function( aFace, aCorner )
     this.faces[ this.iPos ] = aFace;
     this.corners[ this.iPos ] = aCorner;
     this.iPos += 1;
+      var j = trueMod( aCorner, aFace.vertices.length );
+      aFace.vertices[ j ] = this;
 }
 
 Vertex.prototype.show = function( label )
@@ -186,12 +191,10 @@ function fooBuild( figure )
     var f_i = new Face( nCorners );
   // Connect corner 0 of the face to the vertex
     v_0.addCornerPos( f_i, 0 );
-    f_i.vertices[ 0 ] = v_0 ;
 
   // Connect the next corner of the second face to the previous corner of the first face. 
     var v_prev = ensureVertex( f_0, -1, figure );
     v_prev.addCornerNeg( f_i, 1 );
-    f_i.vertices[ 1 ] = v_prev;
 
     f_0.show( 'f_0' );
     f_i.show( 'f_i' );
