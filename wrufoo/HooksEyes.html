@@ -138,8 +138,6 @@ function Face( nSides )
   this.nSides = nSides;
 }
 
-var testFace = new Face( 3 );
-
 Face.prototype.show = function( label )
 {
     console.log( '\n' + label, 'id: ' + this.id, ' nSides: ' + this.nSides );
@@ -152,30 +150,31 @@ Face.prototype.show = function( label )
       }
     }
 }
+// var testFace = new Face( 3 );  testFace.show( 'foo' );
 
 Face.prototype.vertex = function( i )
 {
     return this.vertices[ trueMod( i, this.nSides ) ];
 }
 
-//testFace.show( 'foo' );
-
-
 function ensureVertex( aFace, aCornerIndex, figure )
 {
-    var vZ = aFace.vertex( aCornerIndex );
+    var i = trueMod( aCornerIndex, aFace.nSides ); 
+///    var vZ = aFace.vertex( aCornerIndex );
+    var vZ = aFace.vertices[ i ];
     if( vZ === undefined ) {
         vZ = new Vertex( figure ) ;
+        aFace.vertices[ i ] = vZ;
+        vZ.addCornerPos( aFace, aCornerIndex );
     }
-    aFace.vertices[  trueMod( aCornerIndex, aFace.nSides ) ] = 
-    vZ.addCornerPos( aFace, aCornerIndex );
+////    aFace.vertices[  trueMod( aCornerIndex, aFace.nSides ) ] = 
+///    vZ.addCornerPos( aFace, aCornerIndex );
     return vZ;
 }
 
-testFace = new Face( 4 );
+var testFace = new Face( 4 );
 var vv = ensureVertex( testFace, 2, [3,4,3,4] );
-//testFace.show( 'vv' );
-//vv.show( 'vv' );
+//testFace.show( 'vv' );  vv.show( 'vv' );
 
 
 function fooBuild( figure )
@@ -185,25 +184,12 @@ function fooBuild( figure )
   // The initial face
     var iVslot = 0;
     var nSides = figure[ iVslot ] ;
-    var f0 = new Face( nSides );
-if( false ){    ////////////////////////////////
-  // Going CCW around the face, add a new Vertex to each corner.
-    var v_i;
-    var i;
-    for( i = 0; i < nSides ; i += 1 )
-    {
-        v_i = new Vertex( figure );
-        v_i.addCornerPos( f0, i );
-        f0.vertices[ i ] = v_i;
-    }
-}
-
-///console.log( 'f0: ', f0 );
+    var f_0 = new Face( nSides );
 
   // Begin at corner 0 of the initial face.
   // Add a second face to the vertex after(CCW) the initial face  
-    ///var v_0 = f0.vertices[ 0 ];
-    var v_0 = ensureVertex( f0, 0, figure );
+    var v_0 = ensureVertex( f_0, 0, figure );
+///*    f_0.vertices[ 0 ] = v_0;
     console.assert( v_0.iPos === 1 && v_0.iNeg === 0 );
 
     var nCorners  = v_0.figure[ v_0.iPos ];
@@ -213,22 +199,16 @@ if( false ){    ////////////////////////////////
     f_i.vertices[ 0 ] = v_0 ;
 
   // Connect the next corner of the second face to the previous corner of the first face. 
-/////    var v_prev = f0.vertex( -1 );
-    var v_prev = ensureVertex( f0, -1, figure );
-    v_prev.addCornerNeg( f_i, 1 ); //FIXME
-    f_i.vertices[ 1 ] = v_prev ; //FIXME
+    var v_prev = ensureVertex( f_0, -1, figure );
+////?    f_0.vertices[3] = v_prev;
+    v_prev.addCornerNeg( f_i, 1 ); //FIXME ??
+    f_i.vertices[ 1 ] = v_prev ; //FIXME  ??
 
-  // Add a new Vertex to the remaining corners of the second face.
-    //f_i.vertices[ 2 ] = new Vertex( figure ); //FIXME 
-    var v_x = new Vertex( figure );
-    f_i.vertices[ 2 ] = v_x;
-    
-    f0.show( 'f0' );
+    f_0.show( 'f_0' );
     f_i.show( 'f_i' );
 
     v_0.show( 'v_0' );
     v_prev.show( 'v_prev' );
-    f_i.vertices[ 2 ].show( 'v_x' );
 
 }  
 
