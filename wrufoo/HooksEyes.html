@@ -67,13 +67,11 @@ function Vertex( figure )
 Vertex.prototype.face = function( i )
 {
     return this.faces[ trueMod( i, this.length ) ];
-    // FIXME -- index error
 }
 
 Vertex.prototype.corner = function( i )
 {
     return this.corners[ trueMod( i, this.length ) ];
-    // FIXME -- index error
 }
 
 Vertex.prototype.addCornerNeg = function( aFace, aCorner )
@@ -82,10 +80,6 @@ Vertex.prototype.addCornerNeg = function( aFace, aCorner )
       this.faces[ i ] = aFace;
       this.corners[ i ] = aCorner;
       this.iNeg -= 1;
-
-//    this.iNeg = trueMod( this.iNeg - 1, this.figure.length );
-//    this.faces[ this.iNeg ] = aFace;
-//    this.corners[ this.iNeg ] = aCorner;
 }
 
 Vertex.prototype.addCornerPos = function( aFace, aCorner )
@@ -160,15 +154,12 @@ Face.prototype.vertex = function( i )
 function ensureVertex( aFace, aCornerIndex, figure )
 {
     var i = trueMod( aCornerIndex, aFace.nSides ); 
-///    var vZ = aFace.vertex( aCornerIndex );
     var vZ = aFace.vertices[ i ];
     if( vZ === undefined ) {
         vZ = new Vertex( figure ) ;
         aFace.vertices[ i ] = vZ;
         vZ.addCornerPos( aFace, aCornerIndex );
     }
-////    aFace.vertices[  trueMod( aCornerIndex, aFace.nSides ) ] = 
-///    vZ.addCornerPos( aFace, aCornerIndex );
     return vZ;
 }
 
@@ -189,7 +180,6 @@ function fooBuild( figure )
   // Begin at corner 0 of the initial face.
   // Add a second face to the vertex after(CCW) the initial face  
     var v_0 = ensureVertex( f_0, 0, figure );
-///*    f_0.vertices[ 0 ] = v_0;
     console.assert( v_0.iPos === 1 && v_0.iNeg === 0 );
 
     var nCorners  = v_0.figure[ v_0.iPos ];
@@ -200,9 +190,8 @@ function fooBuild( figure )
 
   // Connect the next corner of the second face to the previous corner of the first face. 
     var v_prev = ensureVertex( f_0, -1, figure );
-////?    f_0.vertices[3] = v_prev;
-    v_prev.addCornerNeg( f_i, 1 ); //FIXME ??
-    f_i.vertices[ 1 ] = v_prev ; //FIXME  ??
+    v_prev.addCornerNeg( f_i, 1 );
+    f_i.vertices[ 1 ] = v_prev;
 
     f_0.show( 'f_0' );
     f_i.show( 'f_i' );
@@ -220,190 +209,6 @@ fooBuild( [4, 3, 4, 3 ] );
 //////////////////////////////////////////////////////
 // OLD STUFF
 /////////////////////////////////////////////////////
-
-/*************************************************************************
-function mkFace( nSides )
-{
-    var newFace = {
-      corners: Array( nSides ),
-      id: objectID( 'F' ),
-    };
-    var i;
-    for( i = 0; i < nSides; i +=1 ){
-        newFace.corners[ i ] = mkCorner( newFace );
-    }
-
-    return newFace;
-}
-
-function showFace( face )
-{
-  console.log( 'id: ', face.id );
-  console.log( 'corners: ', face.corners, face.corners.length );
-  console.log( 'corner 0:', face.corners[0] );
-}
-
-showFace( mkFace( 4 ) );
-showFace( mkFace( 3 ) );
-
-*************************************************************************/
-
-/***************************************************************
-
-function mkPerimeter( )
-{
-    var newPerimeter = {
-      vs: [],   // vertices
-      ix: 0,    // scanning index
-    };
-    return newPerimeter;
-}
-
-
-var thePerimeter = mkPerimeter();
-
-function insertVertex( vertex, position )
-{
-    thePerimeter.vs.splice( position, 0, vertex );
-}
-
-function deleteVertex( position )
-{
-    thePerimeter.vs.splice( position, 1 );
-}
-function showPerimeter()
-{
-    var tp = thePerimeter;
-    console.log( 'thePerimeter', 'length: ' + tp.vs.length, 'ix: ' + tp.ix  );
-    var i;
-    for( i = 0; i < tp.vs.length; i += 1 )
-    {
-      console.log( i, tp.vs[ i ] );
-    }
-}
-
-showPerimeter();
-insertVertex( mkVertex( 3 ), 0 );
-insertVertex( mkVertex( 4 ), 0 );
-insertVertex( mkVertex( 5 ), 0 );
-showPerimeter();
-deleteVertex( 1 );
-showPerimeter();
-insertVertex( mkVertex( 6 ), -1 );
-showPerimeter();
-deleteVertex( 2 );
-showPerimeter();
-
-function attachFace( vertexValence, thisFace, thisCorner, thatFace, thatCorner )  
-{
-    var thisV = thisFace.corners[ thisCorner ];
-    var V = thatFace.corners[ thatCorner ];
-    var theV;
-
-    if( thisV === undefined ){
-        if( thatV === undefined ) {
-            theV = mkVertex( vertexValence );
-            thisFace.corners[ thisCorner ] = theV;
-            thatFace.corners[ thatCorner ] = theV;
-        } else {
-            thisFace.corners[ thisCorner ] = thatV;
-            theV = thatV;
-        }
-    } else {
-        if( thatV === undefined ) {
-            thatFace.corners[ thatCorner ] = thisV;
-            theV = thisV;
-        } else {
-            console.assert( thisV == thatV, 'thisV != thatV' );
-            theV = thisV;
-        }
-    }    
-    
-//FIXME -- this is likely wrong
-
-
-
-}
-
-var sqF = mkFace( 4 );
-console.log( 'sqF: ', sqF );
-var triF = mkFace( 3 );
-console.log( 'triF: ', triF );
-
-attachFace( 4, sqF, triF, 0, 0 );
-
-console.log( 'sqF: ', sqF );
-console.log( 'triF: ', triF );
-
-console.log( 'sqF.vertices', sqF.vertices );
-console.log( 'triF.vertices', triF.vertices );
-
-
-
-
-function attachFace( vertexValence, thisFace, thatFace, thisCorner, thatCorner )
-{
-// FIXME -- assume vertex is empty
-    var vertex_a = mkVertex( vertexValence );
-    showVertex( vertex_a );
-    vertex_a.ngons[ 0 ] = thisFace;
-    vertex_a.corners[ 0 ] = thisCorner;
-    vertex_a.ngons[ 3 ] = thatFace;
-    vertex_a.corners[ 3 ] = thatCorner;
-    thisFace.vertices[0] = vertex_a;
-    thatFace.vertices[0] = vertex_a;
-
-    var vertex_b = mkVertex( vertexValence );
-    vertex_b.ngons[ 1 ] = thisFace;
-    vertex_b.corners[ 1 ] = thisCorner + 1;
-    vertex_b.ngons[ 2 ] = thatFace;
-    vertex_b.corners[ 2 ] = thatCorner - 1;
-    thisFace.vertices[1] = vertex_b;
-    thatFace.vertices[2] = vertex_b;
-}
-var sqF = mkFace( 4 );
-console.log( 'sqF: ', sqF );
-var triF = mkFace( 3 );
-console.log( 'triF: ', triF );
-
-attachFace( 4, sqF, triF, 0, 0 );
-
-console.log( 'sqF: ', sqF );
-console.log( 'triF: ', triF );
-
-console.log( 'sqF.vertices', sqF.vertices );
-console.log( 'triF.vertices', triF.vertices );
-
-************************/
-
-/**************************
-function addFace( parentFace, parentSide, nEdges, v_0, v_1 )
-{
-  // create new face
-
-  var newFace = {
-    id: objectID(),
-    parentFace: parentFace,
-    nEdges: nEdges,
-    neighbors: [ parentFace ],
-    vertices: [ v_0, v_1 ],
-  };
-
-  parentFace.neighbors[ parentSide ] = newFace;
-
-  return newFace;
-}
-var tstFace = {
-  id: objectID(),
-  nEdges:6,
-  neighbors: [10,20,30,40,50,60 ],
-  vertices: [ 200,201,202,203,204,205  ],
-  };
-
-console.log( addFace( tstFace, 3, 4, 204, 203) );
-console.log( tstFace );
-
-***********************************/
 
 </script>
 </body>
