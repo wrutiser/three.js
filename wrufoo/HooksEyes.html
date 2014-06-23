@@ -189,34 +189,52 @@ function connectEdges( fx, cx, fy, cy, figure )
     var v_fxcx = fx.vertex( cx );
     var v_fycy = fy.vertex( cy );
     if( v_fxcx === undefined && v_fycy === undefined ){
-//      v_fxcx = ensureVertex( fx, cx, figure ); v_fxcx.addCornerNeg( fy, cy ); 
         v_fxcx = ensureVertex( fx, cx, figure ).addCornerNeg( fy, cy ); 
+        // console.log( 'undef undef stub' );
+    } else if( v_fxcx === undefined && v_fycy !== undefined ){
+      console.log( 'undef def stub' );
+    } else if( v_fxcx !== undefined && v_fycy === undefined ){
+      fx.vertex(cx).addCornerNeg( fy, cy ); 
+      /// console.log( 'def undef stub' );
+    } else if( v_fxcx !== undefined && v_fycy !== undefined ){
+      console.log( 'def def stub' );
     }
 
     var v_fxcxp1 = fx.vertex( cx + 1 );
     var v_fycym1 = fy.vertex( cy - 1 );
     if( v_fxcxp1 === undefined && v_fycym1 === undefined ){
-        v_fxcxp1 = ensureVertex( fx, cx + 1, figure );
-        v_fxcxp1.addCornerPos( fy, cy - 1 ); 
+        v_fxcxp1 = ensureVertex( fx, cx + 1, figure ).addCornerPos( fy, cy - 1 ); 
+        // console.log( 'undef undef stub' );
+    } else if( v_fxcxp1 !== undefined && v_fycym1 === undefined ){
+        fx.vertex(cx + 1).addCornerPos( fy, cy - 1 ); 
+        // console.log( 'def undef stub' );
+    } else {
+      console.log( 'second vertex stub' );
+      console.log( fx, cx, fy, cy );
+      console.log( 'v_fxcxp1: ', v_fxcxp1, 'v_fycym1: ' , v_fycym1 );
     }
-//    console.log( 'v_fxcx', v_fxcx );
-//    console.log( 'v_fycy', v_fycy );
-//    console.log( 'v_fxcxp1', v_fxcxp1 );
-
-
 }
 
 var aFig = [ 4,3,4,3 ];
 var fa = new Face( 4 );
 var fb = new Face( 3 );
+var fc = new Face( 3 );
+var fd = new Face( 3 );
+var fe = new Face( 3 );
 
 connectEdges( fa, 0, fb, 0, aFig ) ;
+connectEdges( fa, 1, fc, 0, aFig ) ;
+connectEdges( fa, 2, fd, 0, aFig ) ;
+connectEdges( fa, 3, fe, 0, aFig ) ;
 fa.show( 'fa' );
 fb.show( 'fb' );
+fc.show( 'fc' );
+fd.show( 'fd' );
+fe.show( 'fe' );
 fa.vertex(0).show( 'fa.v[0] ' );
-fb.vertex(0).show( 'fb.v[0] ' );
 fa.vertex(1).show( 'fa.v[1] ' );
-fb.vertex(-1).show( 'fb.v[-1] ' );
+fa.vertex(2).show( 'fa.v[2] ' );
+fa.vertex(3).show( 'fa.v[3] ' );
 
 
 
