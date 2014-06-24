@@ -23,8 +23,12 @@
 
 var objectID = function( ) { // open IIFE
   var objectIDglobal = 100;
-  return function( prefix )
+  return function( prefix, reset )
   {
+    if( reset !== undefined ) {
+      objectIDglobal = reset;
+      return 'RESET';
+    }
     var z = objectIDglobal;
     objectIDglobal += 1;
     if( prefix === undefined )
@@ -35,7 +39,11 @@ var objectID = function( ) { // open IIFE
   }
 }();  // close IIFE
 
-//console.log( objectID('TST') );
+/***************
+console.log( objectID('TST') ); console.log( objectID('TST') );
+console.log( objectID( '', 100 ) );
+console.log( objectID('TST') ); console.log( objectID('TST') );
+***************/
 
 function trueMod( i, n )
 {
@@ -211,6 +219,8 @@ function connectEdges( fx, cx, fy, cy, figure )
     connectCorners( fx, cx, fy, cy, figure );
     connectCorners( fy, cy - 1, fx, cx + 1, figure );
 }
+
+console.log( objectID( '', 100 ) );
 
 var aFig = [ 4,3,4,3 ];
 var fa = new Face( 4 ); var fb = new Face( 3 ); var fc = new Face( 3 );
