@@ -70,7 +70,8 @@ function Vertex( figure )
 //    init: iNeg == 0, iPos == 0
 //    slots in use: iPos - iNeg
 //    slots free:  length - iPos + iNeg
-//    slot i is assigned IFF iNeg <= i && iPos < i
+//    slot i is assigned IFF iNeg <= i && iPos < i // FIXME
+//    slot i is assigned IFF iNeg <= i && i < iPos // FIXME
 
 Vertex.prototype.face = function( i )
 {
@@ -238,8 +239,6 @@ fa.vertex(3).show( 'fa.v[3] ' );
 
 
 
-
-
 function fooBuild( figure )
 {
   console.log( '\nfooBuild', figure );
@@ -273,6 +272,52 @@ function fooBuild( figure )
 
 /////////////fooBuild( [4, 3, 4, 3 ] );
 
+
+
+function fillVertex( v )
+{
+    var nSlots = v.figure.length;
+    
+    for( var i = 0; i < nSlots; i += 1 ) {    
+
+    var iP = v.iPos;
+    var iN = v.iNeg;
+
+    var lastActiveSlot = v.iPos - 1;
+    var nextSlot = v.iPos;
+    var lastActiveFace = v.face( lastActiveSlot ); 
+    var lastActiveCorner = v.corner( lastActiveSlot );
+
+    if( nSlots - (iP - iN) > 0 ){
+        var nSides = v.figure[ nextSlot ];
+        var aFace = new Face( nSides );
+        var iSlot = v.addCornerPos( aFace, 0 );
+        if( 0 < iP - iN ){
+            connectCorners( lastActiveFace, lastActiveCorner - 1,
+                          aFace, 1, v.figure );
+        }
+    } else {
+        var firstActiveSlot = iN;
+        var firstActiveFace = v.face( firstActiveSlot );
+        var firstActiveCorner = v.corner( firstActiveSlot );
+        connectCorners( lastActiveFace, lastActiveCorner - 1,
+                        firstActiveFace, firstActiveCorner + 1, v.figure );
+    }
+    }
+}
+
+console.log( '********' + objectID( '', 10 ) );
+var vv = new Vertex( [3,3,3] );
+vv.addCornerPos( new Face(3), 1 );
+vv.show('vv-0');
+//fillVertex( vv );
+//fillVertex( vv );
+fillVertex( vv ); //FIXME
+vv.show( 'vv-1');
+
+vv.face(0).show('vv.face(0)');
+vv.face(1).show('vv.face(1)');
+vv.face(2).show('vv.face(2)');
 /******************************************************
 ************************************/
 
