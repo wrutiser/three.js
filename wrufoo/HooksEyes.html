@@ -276,34 +276,18 @@ function fooBuild( figure )
 
 function fillVertex( v )
 {
-    var nSlots = v.figure.length;
-    
-    for( var i = 0; i < nSlots; i += 1 ) {    
-
-    var iP = v.iPos;
-    var iN = v.iNeg;
-
-    var lastActiveSlot = v.iPos - 1;
-    var nextSlot = v.iPos;
-    var lastActiveFace = v.face( lastActiveSlot ); 
-    var lastActiveCorner = v.corner( lastActiveSlot );
-
-    if( nSlots - (iP - iN) > 0 ){
-        var nSides = v.figure[ nextSlot ];
-        var aFace = new Face( nSides );
-        var iSlot = v.addCornerPos( aFace, 0 );
-        if( 0 < iP - iN ){
-            connectCorners( lastActiveFace, lastActiveCorner - 1,
+    while( v.figure.length - (v.iPos - v.iNeg) > 0 ) {
+        var aFace = new Face( v.figure[ v.iPos ] );
+        v.addCornerPos( aFace, 0 );
+        if( 1 < v.iPos - v.iNeg ){
+            connectCorners( v.face( v.iPos - 2 ), v.corner( v.iPos - 2 ) - 1,
                           aFace, 1, v.figure );
         }
-    } else {
-        var firstActiveSlot = iN;
-        var firstActiveFace = v.face( firstActiveSlot );
-        var firstActiveCorner = v.corner( firstActiveSlot );
-        connectCorners( lastActiveFace, lastActiveCorner - 1,
-                        firstActiveFace, firstActiveCorner + 1, v.figure );
     }
-    }
+
+    connectCorners( v.face( v.iPos - 1 ), v.corner( v.iPos - 1 ) - 1,
+                    v.face( v.iNeg ), v.corner( v.iNeg ) + 1,
+                    v.figure );
 }
 
 console.log( '********' + objectID( '', 10 ) );
