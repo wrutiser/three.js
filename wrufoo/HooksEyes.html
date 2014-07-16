@@ -126,6 +126,19 @@ Vertex.prototype.show = function( label )
 
 var testVertex = new Vertex( [3,2,3,2,3] ); //console.log( 'testVertex', testVertex );
 
+Vertex.prototype.showxFaces = function()
+{
+    var anArray = [ ];
+ anArray.push('id: ' + this.id + '  iNeg: ' + this.iNeg + '  iPos: ' + this.iPos );
+    for( var i = this.iNeg; i < this.iPos; i += 1 ){
+        var ii = trueMod( i, this.length );
+        var aline = ii + ': ' + this.figure[ii] + ' ' +
+            this.faces[ii].id + '[ ' + this.corners[ii] + ' ]';
+        anArray.push(aline);
+        anArray.push(this.faces[ii].showx( '     ') );
+    }
+    return anArray;
+}
 /**********************************************************
 console.log( "starting");
  testVertex.show();
@@ -169,6 +182,24 @@ Face.prototype.show = function( label )
       }
     }
 }
+
+Face.prototype.showx = function( label ) 
+{
+//    console.log( '\n' + label, 'id: ' + this.id, ' nSides: ' + this.nSides );
+    var i;
+    var aline = [ label + this.id + '(' + this.nSides + ')' ];
+    for( i = 0; i < this.nSides; i += 1 )
+    {
+      var v_i = this.vertices[ i ];
+      var s_i = this.slots[ i ];
+      if( v_i !== undefined ) {
+
+        aline.push( i + ':' + v_i.id + '[' + s_i + ']' );
+      }
+    }
+    return aline.join(' ');
+}
+
 // var testFace = new Face( 3 );  testFace.show( 'foo' );
 
 Face.prototype.vertex = function( i )
@@ -178,10 +209,25 @@ Face.prototype.vertex = function( i )
 
 function ensureVertex( aFace, aCornerIndex, figure )
 {
+    var nSides = aFace.nSides;
     var i = trueMod( aCornerIndex, aFace.nSides ); 
     var vZ = aFace.vertices[ i ];
     if( vZ === undefined ) {
         vZ = new Vertex( figure ) ;
+
+        for( var j = 0; j < vZ.length; j += 1 ){
+            if( vZ.figure[ 0 ] !== nSides ) {
+                vZ.figure.push( vZ.figure.shift() );
+            } else {
+                j = vZ.length;
+            }
+        }
+        if( j > vZ.length + 1 ){
+          console.log( "j, length", j, vZ.length );
+          console.log( "EnsureVertex unable to adjust figure!!" );
+          console.log( "id: " + vZ.id + "nSides: " + nSides + "figure: " + figure );
+        }
+
         aFace.vertices[ i ] = vZ;
         var si = vZ.addCornerPos( aFace, aCornerIndex );
         aFace.slots[ i ] = si;
@@ -221,6 +267,7 @@ function connectEdges( fx, cx, fy, cy, figure )
     connectCorners( fy, cy - 1, fx, cx + 1, figure );
 }
 
+/*******************************************************
 console.log( objectID( '', 100 ) );
 
 var aFig = [ 4,3,4,3 ];
@@ -236,7 +283,7 @@ fa.vertex(0).show( 'fa.v[0] ' );
 fa.vertex(1).show( 'fa.v[1] ' );
 fa.vertex(2).show( 'fa.v[2] ' );
 fa.vertex(3).show( 'fa.v[3] ' );
-
+*********************************************************/
 
 
 function fooBuild( figure )
@@ -290,20 +337,39 @@ function fillVertex( v )
                     v.figure );
 }
 
+/******************************************************
 console.log( '********' + objectID( '', 10 ) );
 var vv = new Vertex( [3,3,3] );
-vv.addCornerPos( new Face(3), 1 );
+//vv.addCornerPos( new Face(3), 1 );
 vv.show('vv-0');
-//fillVertex( vv );
-//fillVertex( vv );
 fillVertex( vv ); //FIXME
 vv.show( 'vv-1');
 
-vv.face(0).show('vv.face(0)');
-vv.face(1).show('vv.face(1)');
-vv.face(2).show('vv.face(2)');
-/******************************************************
+vv.face(0).showx('vv.face(0)');
+vv.face(1).showx('vv.face(1)');
+vv.face(2).showx('vv.face(2)');
+
+console.log( vv.showxFaces() );
+
+//vv.face(0).show('vv.face(0)');
+//vv.face(1).show('vv.face(1)');
+//vv.face(2).show('vv.face(2)');
 ************************************/
+
+console.log( '********' + objectID( '', 10 ) );
+var vv = new Vertex( [3,3,3] );
+fillVertex( vv ); //FIXME
+console.log( vv.showxFaces().join('\n') );
+
+
+console.log( '********' + objectID( '', 10 ) );
+var vv = new Vertex( [4,3,4,3] );
+fillVertex( vv ); //FIXME
+console.log( vv.showxFaces().join('\n') );
+fillVertex( vv.face(0).vertex(1) );
+console.log(  vv.face(0).vertex(1).showxFaces().join('\n') );
+
+console.log( 'byebye' );
 
 //////////////////////////////////////////////////////
 // OLD STUFF
