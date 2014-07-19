@@ -53,7 +53,7 @@ function trueMod( i, n )
 console.assert( trueMod( -3, 5 ) === 2, 'trueMod' );
 console.assert( trueMod(  3, 5 ) === 3, 'trueMod' );
 
-
+//VERTEX
 function Vertex( figure )
 {
     this.id = objectID( 'V' )
@@ -160,6 +160,9 @@ console.log( "unstarting");
 console.assert( testVertex.corner(-2) === testVertex.corner( 3 ) );
 
 **********************************************************/
+//FACE
+
+var allFaces = []
 
 function Face( nSides )
 {
@@ -167,6 +170,8 @@ function Face( nSides )
   this.vertices = Array( nSides );
   this.slots = Array( nSides );
   this.nSides = nSides;
+
+  allFaces.push( this );
 }
 
 Face.prototype.show = function( label )
@@ -200,6 +205,31 @@ Face.prototype.showx = function( label )
     return aline.join(' ');
 }
 
+
+Face.prototype.check = function()
+{
+    var i;
+    for( i = 0; i < this.nSides; i += 1 )
+    {
+        var v_i = this.vertices[ i ];
+        var s_i = this.slots[ i ];
+        if( v_i !== undefined ) {
+            var aFace =  v_i.faces[ s_i ] ;
+            var iCorner = v_i.corners[ s_i ] ;
+            var fig_s_i = v_i.figure[ s_i ];
+
+            var msg = this.id + '[' + i + ']  ' + v_i.id + '[' + s_i + ']' ;
+            if( aFace !== this || iCorner !== i || this.nSides !== fig_s_i ){
+                console.log( 'this face:', this.id, 'aFace: ' + aFace.id ); 
+                console.log( 'i: ', i + '  iCorner: ' + iCorner );
+                console.log( 'nSides: ' + this.nSides, 'fig_s_i: ' + fig_s_i );
+            }
+
+
+        }
+    }
+}
+
 // var testFace = new Face( 3 );  testFace.show( 'foo' );
 
 Face.prototype.vertex = function( i )
@@ -216,7 +246,9 @@ function ensureVertex( aFace, aCornerIndex, figure )
         vZ = new Vertex( figure ) ;
 
         for( var j = 0; j < vZ.length; j += 1 ){
+// FIXME -- destructive ops on shared array
             if( vZ.figure[ 0 ] !== nSides ) {
+
                 vZ.figure.push( vZ.figure.shift() );
             } else {
                 j = vZ.length;
@@ -338,36 +370,27 @@ function fillVertex( v )
 }
 
 /******************************************************
-console.log( '********' + objectID( '', 10 ) );
-var vv = new Vertex( [3,3,3] );
-//vv.addCornerPos( new Face(3), 1 );
-vv.show('vv-0');
-fillVertex( vv ); //FIXME
-vv.show( 'vv-1');
-
-vv.face(0).showx('vv.face(0)');
-vv.face(1).showx('vv.face(1)');
-vv.face(2).showx('vv.face(2)');
-
-console.log( vv.showxFaces() );
-
-//vv.face(0).show('vv.face(0)');
-//vv.face(1).show('vv.face(1)');
-//vv.face(2).show('vv.face(2)');
 ************************************/
 
+//WORKING
+
 console.log( '********' + objectID( '', 10 ) );
+allFaces = []
 var vv = new Vertex( [3,3,3] );
 fillVertex( vv ); //FIXME
 console.log( vv.showxFaces().join('\n') );
-
+allFaces.forEach( function( ff ){ ff.check() } ) ;
 
 console.log( '********' + objectID( '', 10 ) );
+allFaces = []
 var vv = new Vertex( [4,3,4,3] );
+
 fillVertex( vv ); //FIXME
 console.log( vv.showxFaces().join('\n') );
 fillVertex( vv.face(0).vertex(1) );
 console.log(  vv.face(0).vertex(1).showxFaces().join('\n') );
+
+allFaces.forEach( function( ff ){ ff.check() } ) ;
 
 console.log( 'byebye' );
 
