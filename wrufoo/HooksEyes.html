@@ -33,10 +33,10 @@ var objectID = function( ) { // open IIFE
     objectIDglobal += 1;
     if( prefix === undefined )
     {
-        prefix = ''
+        prefix = '';
     }
     return prefix + z;
-  }
+  };
 }();  // close IIFE
 
 /***************
@@ -47,7 +47,7 @@ console.log( objectID('TST') ); console.log( objectID('TST') );
 
 function trueMod( i, n )
 {
-    return ( i % n + n ) % n
+    return ( i % n + n ) % n;
 }
 
 console.assert( trueMod( -3, 5 ) === 2, 'trueMod' );
@@ -56,7 +56,7 @@ console.assert( trueMod(  3, 5 ) === 3, 'trueMod' );
 //VERTEX
 function Vertex( figure )
 {
-    this.id = objectID( 'V' )
+    this.id = objectID( 'V' );
     this.figure = figure;
     this.length = figure.length;
     this.faces = new Array( this.length );
@@ -76,12 +76,12 @@ function Vertex( figure )
 Vertex.prototype.face = function( i )
 {
     return this.faces[ trueMod( i, this.length ) ];
-}
+};
 
 Vertex.prototype.corner = function( i )
 {
     return this.corners[ trueMod( i, this.length ) ];
-}
+};
 
 Vertex.prototype.addCornerNeg = function( aFace, aCorner )
 {
@@ -95,7 +95,7 @@ Vertex.prototype.addCornerNeg = function( aFace, aCorner )
       aFace.slots[ j ] = i;
 
       return i;
-}
+};
 
 Vertex.prototype.addCornerPos = function( aFace, aCorner )
 {
@@ -110,19 +110,20 @@ Vertex.prototype.addCornerPos = function( aFace, aCorner )
       this.iPos += 1;
 
       return slot;
-}
+};
 
 Vertex.prototype.show = function( label )
 {
     console.log( '\n' + label, 'id: ' + this.id, '  iNeg: ' + this.iNeg, '  iPos: ' + this.iPos );
     var i;
+    var ii;
     for( i = this.iNeg; i < this.iPos; i += 1 )
     {
-      var ii = trueMod( i, this.length );
+      ii = trueMod( i, this.length );
       //console.log( ii, this.figure[ii], this.faces[ii].id, this.corners[ii] );
       console.log( ii + ': ' + this.figure[ii] + ' ' + this.faces[ii].id + '[ ' + this.corners[ii] + ' ]' );
     }
-}
+};
 
 var testVertex = new Vertex( [3,2,3,2,3] ); //console.log( 'testVertex', testVertex );
 
@@ -130,15 +131,16 @@ Vertex.prototype.showxFaces = function()
 {
     var anArray = [ ];
  anArray.push('id: ' + this.id + '  iNeg: ' + this.iNeg + '  iPos: ' + this.iPos );
-    for( var i = this.iNeg; i < this.iPos; i += 1 ){
-        var ii = trueMod( i, this.length );
-        var aline = ii + ': ' + this.figure[ii] + ' ' +
+    var i, ii, aline;
+    for( i = this.iNeg; i < this.iPos; i += 1 ){
+        ii = trueMod( i, this.length );
+        aline = ii + ': ' + this.figure[ii] + ' ' +
             this.faces[ii].id + '[ ' + this.corners[ii] + ' ]';
         anArray.push(aline);
         anArray.push(this.faces[ii].showx( '     ') );
     }
     return anArray;
-}
+};
 /**********************************************************
 console.log( "starting");
  testVertex.show();
@@ -178,41 +180,45 @@ Face.prototype.show = function( label )
 {
     console.log( '\n' + label, 'id: ' + this.id, ' nSides: ' + this.nSides );
     var i;
+    var v_i, s_i;
     for( i = 0; i < this.nSides; i += 1 )
     {
-      var v_i = this.vertices[ i ];
-      var s_i = this.slots[ i ];
+      v_i = this.vertices[ i ];
+      s_i = this.slots[ i ];
       if( v_i !== undefined ) {
           console.log( i + ': ', v_i.id + '[ ' + s_i + ' ]' );
       }
     }
-}
+};
 
 Face.prototype.showx = function( label ) 
 {
 //    console.log( '\n' + label, 'id: ' + this.id, ' nSides: ' + this.nSides );
     var i;
     var aline = [ label + this.id + '(' + this.nSides + ')' ];
+    var v_i, s_i;
     for( i = 0; i < this.nSides; i += 1 )
     {
-      var v_i = this.vertices[ i ];
-      var s_i = this.slots[ i ];
+      v_i = this.vertices[ i ];
+      s_i = this.slots[ i ];
       if( v_i !== undefined ) {
 
         aline.push( i + ':' + v_i.id + '[' + s_i + ']' );
       }
     }
     return aline.join(' ');
-}
+};
+
 
 
 Face.prototype.check = function()
 {
-    var i;
+    var i, v_i, s_i;
+    var aFace, iCorner, fig_s_i, msg;
     for( i = 0; i < this.nSides; i += 1 )
     {
-        var v_i = this.vertices[ i ];
-        var s_i = this.slots[ i ];
+        v_i = this.vertices[ i ];
+        s_i = this.slots[ i ];
         if( v_i !== undefined ) {
             var aFace =  v_i.faces[ s_i ] ;
             var iCorner = v_i.corners[ s_i ] ;
@@ -228,14 +234,14 @@ Face.prototype.check = function()
 
         }
     }
-}
+};
 
 // var testFace = new Face( 3 );  testFace.show( 'foo' );
 
 Face.prototype.vertex = function( i )
 {
     return this.vertices[ trueMod( i, this.nSides ) ];
-}
+};
 
 function ensureVertex( aFace, aCornerIndex, figure )
 {
@@ -244,7 +250,7 @@ function ensureVertex( aFace, aCornerIndex, figure )
     var vZ = aFace.vertices[ i ];
     if( vZ === undefined ) {
         vZ = new Vertex( figure ) ;
-
+/********************************
         for( var j = 0; j < vZ.length; j += 1 ){
 // FIXME -- destructive ops on shared array
             if( vZ.figure[ 0 ] !== nSides ) {
@@ -260,6 +266,7 @@ function ensureVertex( aFace, aCornerIndex, figure )
           console.log( "id: " + vZ.id + "nSides: " + nSides + "figure: " + figure );
         }
 
+******************************/
         aFace.vertices[ i ] = vZ;
         var si = vZ.addCornerPos( aFace, aCornerIndex );
         aFace.slots[ i ] = si;
@@ -272,21 +279,33 @@ var vv = ensureVertex( testFace, 2, [3,4,3,4] );
 //testFace.show( 'vv' );  vv.show( 'vv' );
 
 function connectCorners( fp, cpr, fq, cqr, figure )
-{
+{       // "r" ????
     var cp = trueMod( cpr, fp.nSides );
     var cq = trueMod( cqr, fq.nSides );
-
     var vp = fp.vertex( cp );
     var vq = fq.vertex( cq );
+    var nsp = fp.nSides;
+    var nsq = fq.nSides;
+
+    var si;
     if( vp === undefined && vq === undefined ){
-        vp = ensureVertex( fp, cp, figure ).addCornerNeg( fq, cq ); 
-        // console.log( 'undef undef stub' );
-    } else if( vp === undefined && vq !== undefined ){
-      fq.vertex(cq).addCornerPos( fp, cp );
-        // console.log( 'undef def stub' );
+        if( nsp <= nsq ){
+            vq = new Vertex( figure ) ;
+            fq.vertices[ cq ] = vq;
+            si = vq.addCornerPos( fq, cq );
+            fq.slots[ cq ] = si;
+        } else {
+            vp = new Vertex( figure ) ;
+            fp.vertices[ cp ] = vp;
+            si = vp.addCornerPos( fp, cp );
+            fp.slots[ cp ] = si;
+        }
+    }
+
+    if( vp === undefined && vq !== undefined ){
+        fq.vertex(cq).addCornerPos( fp, cp );
     } else if( vp !== undefined && vq === undefined ){
       fp.vertex(cp).addCornerNeg( fq, cq ); 
-      /// console.log( 'def undef stub' );
     } else if( vp !== undefined && vq !== undefined ){
       console.log( 'def def stub' );
       console.log( fp, cp, fq, cq );
@@ -355,8 +374,9 @@ function fooBuild( figure )
 
 function fillVertex( v )
 {
+    var aFace;
     while( v.figure.length - (v.iPos - v.iNeg) > 0 ) {
-        var aFace = new Face( v.figure[ v.iPos ] );
+        aFace = new Face( v.figure[ v.iPos ] );
         v.addCornerPos( aFace, 0 );
         if( 1 < v.iPos - v.iNeg ){
             connectCorners( v.face( v.iPos - 2 ), v.corner( v.iPos - 2 ) - 1,
@@ -369,10 +389,10 @@ function fillVertex( v )
                     v.figure );
 }
 
-/******************************************************
-************************************/
 
+//////////////////////////////////////////////////////
 //WORKING
+//////////////////////////////////////////////////////
 
 console.log( '********' + objectID( '', 10 ) );
 allFaces = []
@@ -387,6 +407,8 @@ var vv = new Vertex( [4,3,4,3] );
 
 fillVertex( vv ); //FIXME
 console.log( vv.showxFaces().join('\n') );
+console.log( vv.face(0).vertex(1).showxFaces().join('\n') );
+
 fillVertex( vv.face(0).vertex(1) );
 console.log(  vv.face(0).vertex(1).showxFaces().join('\n') );
 
