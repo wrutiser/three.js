@@ -44,6 +44,9 @@ console.log( objectID( '', 100 ) );
 console.log( objectID('TST') ); console.log( objectID('TST') );
 ***************/
 
+/////////////////////////////////////////////////////
+// trueMod
+/////////////////////////////////////////////////////
 function trueMod( i, n )
 {
     return ( i % n + n ) % n;
@@ -84,34 +87,33 @@ Vertex.prototype.corner = function( i )
     return this.corners[ trueMod( i, this.length ) ];
 };
 
+
+Vertex.prototype.addCorner = function( aFace, aCorner, slot )
+{
+      this.faces[ slot ] = aFace;
+      this.corners[ slot ] = aCorner;
+
+      var j = trueMod( aCorner, aFace.vertices.length );
+      aFace.vertices[ j ] = this;
+      aFace.slots[ j ] = slot;
+};
+
 Vertex.prototype.addCornerNeg = function( aFace, aCorner )
 {
       var slot = trueMod(this.iNeg - 1, this.length);
-      this.faces[ slot ] = aFace;
-      this.corners[ slot ] = aCorner;
+      this.addCorner( aFace, aCorner, slot);
       this.iNeg -= 1;
-      
-      var j = trueMod( aCorner, aFace.vertices.length );
-      aFace.vertices[ j ] = this;
-      aFace.slots[ j ] = slot;
-
       return slot;
 };
-// FIXME extract common code from these two.
+
 Vertex.prototype.addCornerPos = function( aFace, aCorner )
 {
       var slot = this.iPos;
-      this.faces[ slot ] = aFace;
-      this.corners[ slot ] = aCorner;
-
-      var j = trueMod( aCorner, aFace.vertices.length );
-      aFace.vertices[ j ] = this;
-      aFace.slots[ j ] = slot;
-      
-      this.iPos += 1;
-
+      this.addCorner( aFace, aCorner, slot);
+      this.iPos = slot + 1;
       return slot;
 };
+
 
 Vertex.prototype.show = function( label )
 {
