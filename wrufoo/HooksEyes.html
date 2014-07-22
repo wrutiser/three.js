@@ -126,9 +126,6 @@ Vertex.prototype.show = function( label )
     }
 };
 
-var testVertex = new Vertex( [3,2,3,2,3] );
-//console.log( 'testVertex', testVertex );
-
 Vertex.prototype.showxFaces = function()
 {
     var anArray = [ ];
@@ -144,26 +141,6 @@ Vertex.prototype.showxFaces = function()
     return anArray;
 };
 
-/**********************************************************
-console.log( "starting");
- testVertex.show();
-testVertex.addCornerPos( 'foo', 'a' );
- testVertex.show();
-testVertex.addCornerNeg( 'foo', 'z' );
- testVertex.show();
-testVertex.addCornerPos( 'foo', 'b' );
- testVertex.show();
-testVertex.addCornerNeg( 'foo', 'y' );
- testVertex.show();
-testVertex.addCornerNeg( 'foo', 'x' );
- testVertex.show();
-
-console.log( "unstarting");
-
- console.log( 'testVertex', testVertex );
-
-console.assert( testVertex.corner(-2) === testVertex.corner( 3 ) );
-**********************************************************/
 /////////////////////////////////////////////////////
 // FACE
 /////////////////////////////////////////////////////
@@ -235,6 +212,7 @@ Face.prototype.vertex = function( i )
     return this.vertices[ trueMod( i, this.nSides ) ];
 };
 
+/***************************************************
 function ensureVertex( aFace, aCornerIndex, figure )
 {
     var nSides = aFace.nSides;
@@ -252,6 +230,7 @@ function ensureVertex( aFace, aCornerIndex, figure )
 var testFace = new Face( 4 );
 var vv = ensureVertex( testFace, 2, [3,4,3,4] );
 //testFace.show( 'vv' );  vv.show( 'vv' );
+***************************************************/
 
 function connectCorners( fp, cpr, fq, cqr, figure )
 {
