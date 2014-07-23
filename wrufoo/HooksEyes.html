@@ -58,6 +58,9 @@ console.assert( trueMod(  3, 5 ) === 3, 'trueMod' );
 /////////////////////////////////////////////////////
 // VERTEX
 /////////////////////////////////////////////////////
+
+var allVertices = [];
+
 function Vertex( figure )
 {
     this.id = objectID( 'V' );
@@ -68,6 +71,9 @@ function Vertex( figure )
 
     this.iNeg  = 0;
     this.iPos  = 0;
+
+    allVertices.push( this );
+
 }
 // Invariants:
 //    -length <= iNeg <= 0 <= iPos <= length
@@ -232,6 +238,8 @@ var vv = ensureVertex( testFace, 2, [3,4,3,4] );
 //testFace.show( 'vv' );  vv.show( 'vv' );
 ***************************************************/
 
+var unfilledVertices = [];
+
 function connectCorners( fp, cpr, fq, cqr, figure )
 {
     // cpr and qpr may be negative. r seems to mean relative.
@@ -246,11 +254,13 @@ function connectCorners( fp, cpr, fq, cqr, figure )
     if( vp === undefined && vq === undefined ){
         if( nsp <= nsq ){
             vq = new Vertex( figure ) ;
+            unfilledVertices.push( vq );
             fq.vertices[ cq ] = vq;
             si = vq.addCornerPos( fq, cq );
             fq.slots[ cq ] = si;
         } else {
             vp = new Vertex( figure ) ;
+            unfilledVertices.push( vp );
             fp.vertices[ cp ] = vp;
             si = vp.addCornerPos( fp, cp );
             fp.slots[ cp ] = si;
@@ -262,8 +272,11 @@ function connectCorners( fp, cpr, fq, cqr, figure )
     } else if( vp !== undefined && vq === undefined ){
         fp.vertex(cp).addCornerNeg( fq, cq ); 
     } else if( vp !== undefined && vq !== undefined ){
-        console.log( 'def def stub' );
-        console.log( fp, cp, fq, cq );
+          if( vp !== vq ) {
+              console.log( 'fp !== vq  '
+                     + fp.id + '[ ' + cp + ' ] ' + vp.id
+             + '   ' + fq.id + '[ ' + cq + ' ] ' + vq.id )
+          }
     }
 } 
 
@@ -275,6 +288,7 @@ function connectEdges( fx, cx, fy, cy, figure )
 
 function fillVertex( v )
 {
+    console.assert( v != undefined );
     var aFace;
     while( v.figure.length - (v.iPos - v.iNeg) > 0 ) {
         aFace = new Face( v.figure[ v.iPos ] );
@@ -291,10 +305,43 @@ function fillVertex( v )
 }
 
 
+
+// FIXME Name this THING
+function foo( figure )
+{
+    console.log( 'Figure:', figure );
+    var vv;
+    allVertices = [];
+    allFaces = [];
+    unfilledVertices = [];
+    unfilledVertices.push( new Vertex( figure ) );
+
+    while( 0 < unfilledVertices.length ){
+        vv = unfilledVertices.shift();
+        fillVertex( vv );
+    }
+}
+
+
+
+
+
+
 //////////////////////////////////////////////////////
 //WORKING
 //////////////////////////////////////////////////////
 
+console.log( '********' + objectID( '', 10 ) );
+
+foo( [3,3,3] );
+allVertices.forEach( function (vv) {console.log( vv.showxFaces().join('\n'))} );
+allFaces.forEach( function( ff ){ ff.check() } ) ;
+
+console.log( '********' + objectID( '', 10 ) );
+foo( [4, 3, 4, 3] );
+allVertices.forEach( function (vv) {console.log( vv.showxFaces().join('\n'))} );
+allFaces.forEach( function( ff ){ ff.check() } ) ;
+/******************************************************************
 console.log( '********' + objectID( '', 10 ) );
 allFaces = []
 var vv = new Vertex( [4,3,4,3] );
@@ -309,7 +356,7 @@ console.log(  vv.face(0).vertex(1).showxFaces().join('\n') );
 allFaces.forEach( function( ff ){ ff.check() } ) ;
 
 console.log( 'byebye' );
-
+********************************************************************/
 //////////////////////////////////////////////////////
 // OLD STUFF
 /////////////////////////////////////////////////////
